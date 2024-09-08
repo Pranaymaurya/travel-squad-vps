@@ -1,0 +1,23 @@
+.swiper {
+    width: 100%;
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+  .swiper-3d {
+    perspective: 1470px;
+}
+  
+.swiper-slide {
+    background-position: center;
+    background-size: cover;
+    width: 905px;
+    height: 322px;
+    overflow: hidden;
+    object-fit: cover;
+}
+  
+  .swiper-slide img {
+    display: block;
+    width: 100%;
+    object-fit: cover;
+}
