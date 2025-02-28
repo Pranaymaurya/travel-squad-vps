@@ -493,6 +493,7 @@ const EditHotel = () => {
               //onChange={handleImageChange}
               onChange={(e) => setImageUrl(e.target.files[0])}
             />
+            
           </div>
           <div className="flex flex-col">
             <label className="mb-2 font-medium" htmlFor="location">
@@ -600,6 +601,8 @@ const EditHotel = () => {
               onChange={handleAddImage}
             />
             <div className="space-y-2">
+              {console.log(images)
+              }
               {images.map((image, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <img
@@ -665,6 +668,8 @@ const EditHotel = () => {
               Add Amenity
             </button>
             <div className="space-y-2">
+            {console.log(amenities)
+            }
               {amenities.map((amenity, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <p>{amenity}</p>
@@ -841,12 +846,14 @@ const EditHotel = () => {
             <label className="mb-2 font-medium" htmlFor="foodAndDiningImage">
               Image
             </label>
+            {console.log(foodAndDining.img)}
             <input
               type="file"
               id="foodAndDiningImage"
               className="border border-gray-300 rounded-md p-2"
               onChange={(e) => handleImageChange(e, "foodAndDining")}
             />
+            <img src={`${backendUrl}${foodAndDining.img}`} alt={`${foodAndDining.title}`} className="w-16 h-16" />
           </div>
 
           <div className="border p-4 rounded-md space-y-4">
@@ -918,6 +925,7 @@ const EditHotel = () => {
               className="border border-gray-300 rounded-md p-2"
               onChange={(e) => handleImageChange(e, "locationAndSurroundings")}
             />
+            <img src={`${backendUrl}${locationAndSurroundings.img}`} alt={`${locationAndSurroundings.title}`} className="w-16 h-16" />
           </div>
 
           <div className="border p-4 rounded-md space-y-4">
@@ -989,6 +997,7 @@ const EditHotel = () => {
               className="border border-gray-300 rounded-md p-2"
               onChange={(e) => handleImageChange(e, "roomDetailsAndAmenities")}
             />
+            <img src={`${backendUrl}${roomDetailsAndAmenities.img}`} alt={`${roomDetailsAndAmenities.title}`} className="w-16 h-16" />
           </div>
 
           <div className="border p-4 rounded-md space-y-4">
@@ -1069,6 +1078,9 @@ const EditHotel = () => {
                 handleImageChange(e, "activitiesAndNearbyAttractions")
               }
             />
+            {console.log(activitiesAndNearbyAttractions.img)
+            }
+            <img src={`${backendUrl}${activitiesAndNearbyAttractions.img}`} alt={`${activitiesAndNearbyAttractions.title}`} className="w-16 h-16" />
           </div>
 
           <div className="border p-4 rounded-md space-y-4">

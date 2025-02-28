@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 
 const AddHotel = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  console.log(import.meta.env);
+  
 
   const { hotelId } = useParams();
   const [imageUrl, setImageUrl] = useState("");
@@ -370,6 +372,7 @@ const AddHotel = () => {
       };
 
    
+console.log(hotelData);
 
       await axios.post(`${backendUrl}/api/admin/hotel`, hotelData, {
         headers: {

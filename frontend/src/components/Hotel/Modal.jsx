@@ -16,7 +16,7 @@ const Modal = ({ open, onClose, title, description, img }) => {
         />
         <div className="modal-content overflow-y-auto max-h-[80vh]">
           <h2 className="modal-title text-2xl font-bold mb-4">{title}</h2>
-          <img src={img} alt={title} className="modal-image mb-4 w-full" />
+          <img src={`${import.meta.env.VITE_BACKEND_URL}${img}`} alt={title} className="modal-image mb-4 w-full" />
           {Array.isArray(description) ? (
             <ul className="list-disc pl-4">
               {description.map((item, index) => (
