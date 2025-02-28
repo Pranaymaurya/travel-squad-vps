@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
+console.log('dsalkj');
 
 const HotelSection = ({ hotel, index, id, onDelete }) => (
   <tr className="border-b border-black text-[0.675rem] sm:text-sm">
