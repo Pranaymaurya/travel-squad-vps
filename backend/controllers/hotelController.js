@@ -1,5 +1,6 @@
 import asyncHandler from "../middleware/asyncHandler.js";
 import Hotel from "../models/hotelModel.js";
+import {FindAndDeleteImage,DeleteImage} from "../config/DeleteImage.js";
 
 const getHotels = asyncHandler(async (req, res) => {
   const hotels = await Hotel.find({});
@@ -21,6 +22,14 @@ const deleteHotel = asyncHandler(async (req, res) => {
   const hotel = await Hotel.findById(req.params.id);
 
   if (hotel) {
+    DeleteImage(hotel.imageUrl);
+    DeleteImage(hotel.foodAndDining.img);
+    DeleteImage(hotel.locationAndSurroundings.img);
+    DeleteImage(hotel.roomDetailsAndAmenities.img);
+    DeleteImage(hotel.activitiesAndNearbyAttractions.img);
+    for (let i of hotel.images) {
+      DeleteImage(i);
+    }
     await Hotel.deleteOne({ _id: hotel._id });
     res.json({ message: "Hotel removed" });
   } else {
@@ -66,6 +75,18 @@ const updateHotel = asyncHandler(async (req, res) => {
 
     const formattedImagePath = imageUrl.replace(/\\/g, "/");
 
+    console.log(req.body);
+   const getHotelImageurl= FindAndDeleteImage(hotel.imageUrl, formattedImagePath);
+   FindAndDeleteImage(hotel.foodAndDining.img,foodAndDining.img)
+   FindAndDeleteImage(hotel.locationAndSurroundings.img,locationAndSurroundings.img)
+   FindAndDeleteImage(hotel.roomDetailsAndAmenities.img,roomDetailsAndAmenities.img)
+   FindAndDeleteImage(hotel.activitiesAndNearbyAttractions.img,activitiesAndNearbyAttractions.img);
+    for (let i of hotel.images) {
+      if (!images.includes(i)) {
+        DeleteImage(i);
+      }
+     }
+    
     // Update tour properties
     hotel.imageUrl = formattedImagePath;
     hotel.name = name;
@@ -85,7 +106,7 @@ const updateHotel = asyncHandler(async (req, res) => {
     hotel.amenities = amenities;
     hotel.facilities = facilities;
     hotel.foodAndDining = foodAndDining;
-    hotel.imagelocationAndSurroundingss = locationAndSurroundings;
+    hotel.locationAndSurroundings = locationAndSurroundings;
     hotel.roomDetailsAndAmenities = roomDetailsAndAmenities;
     hotel.activitiesAndNearbyAttractions = activitiesAndNearbyAttractions;
     hotel.hotelDetails = hotelDetails;
@@ -124,6 +145,7 @@ const createHotel = asyncHandler(async (req, res) => {
     activitiesAndNearbyAttractions,
     hotelDetails,
   } = req.body;
+console.log(req.body);
 
   if (
     !imageUrl ||
@@ -138,7 +160,7 @@ const createHotel = asyncHandler(async (req, res) => {
     !images ||
     !star ||
     !type ||
-    !featured ||
+    !featured ===''||
     !hotelPriceHighlight ||
     !inclusions ||
     !amenities ||
