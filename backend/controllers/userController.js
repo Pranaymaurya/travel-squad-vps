@@ -1,4 +1,6 @@
 import asyncHandler from "../middleware/asyncHandler.js";
+import Cab from "../models/cabModel.js";
+import Hotel from "../models/hotelModel.js";
 import User from "../models/userModel.js";
 import generateToken from "../utils/generatetoken.js";
 
@@ -165,7 +167,37 @@ const updateUser = asyncHandler(async (req, res) => {
   res.send("update user");
 });
 
+const changerole=asyncHandler(async(req,res)=>{
+  try {
+     const {role,userId,name}=req.body;
+  if(role!=='cab' && role!=='hotel'  && role!=='user'){
+    res.status(404);
+    throw new Error("Role is required");
+  }
+  const user=await  User.findById(userId);
+  if(!user){
+    res.status(404);
+    throw new Error("User not found");
+  }
+    user.role=role;
+    if(role==='cab'){
+      const cab=await Cab.create({name,user:user._id})
+      cab.save()
+    }
+    else if(role==='hotel'){
+      const hotel=await Hotel.create({name,user:user._id})
+      hotel.save()
+    }
+  await user.save();
+  res.json(user);
+  } catch (error) {
+    res.status(500).json({success:false,message:"Internal Server Error"});
+  }
+})
+
+
 export {
+  changerole,
   authUser,
   registerUser,
   logoutUser,

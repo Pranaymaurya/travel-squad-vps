@@ -7,6 +7,8 @@ const getHotels = asyncHandler(async (req, res) => {
   res.json(hotels);
 });
 
+
+
 const getHotelsById = asyncHandler(async (req, res) => {
   const hotel = await Hotel.findById(req.params.id);
 
@@ -62,6 +64,7 @@ const updateHotel = asyncHandler(async (req, res) => {
     roomDetailsAndAmenities,
     activitiesAndNearbyAttractions,
     hotelDetails,
+    NumberOfRooms,
   } = req.body;
 
   try {
@@ -110,6 +113,7 @@ const updateHotel = asyncHandler(async (req, res) => {
     hotel.roomDetailsAndAmenities = roomDetailsAndAmenities;
     hotel.activitiesAndNearbyAttractions = activitiesAndNearbyAttractions;
     hotel.hotelDetails = hotelDetails;
+    hotel.NumberofRooms  = NumberOfRooms;
 
     // Save the updated Tour document
     const updatedHotel = await hotel.save();
@@ -210,4 +214,19 @@ console.log(req.body);
   }
 });
 
-export { getHotels, getHotelsById, deleteHotel, updateHotel, createHotel };
+const UpdateRoom=async(req,res)=>{
+  try {
+    const {id}=req.params;
+    const {NumberOfRooms}=req.body;
+    const hotel=await Hotel.findOne({_id:id,user:req.user._id});
+    if(!hotel) return res.status(404).json({success:false,message:"Hotel Not Found"})
+    hotel.NumberofRooms =NumberOfRooms;
+    await hotel.save();
+    res.status(200).json({success:true
+    ,message:hotel})
+  } catch (error) {
+    res.status(500).json({success:false,message:"Internal Server Error"})
+  }
+}
+
+export { getHotels, getHotelsById, deleteHotel, updateHotel, createHotel,UpdateRoom };
