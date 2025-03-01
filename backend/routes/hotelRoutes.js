@@ -6,14 +6,14 @@ import {
   updateHotel,
   UpdateRoom
 } from "../controllers/hotelController.js";
-import { protect, admin } from "../middleware/authMiddleware.js";
+import { protect, admin, AccessRole } from "../middleware/authMiddleware.js";
 
 router.route("/").get(getHotels)
 router.route("/:id")
 .get(getHotelsById)
-.put(protect, updateHotel);
+.put(protect,AccessRole(['admin','hotel']), updateHotel);
 
-router.put("/room/:id",protect,UpdateRoom)
+router.put("/room/:id",protect,AccessRole(['admin','hotel']),UpdateRoom)
 // .post( createBlog);
 // router.route("/:id").get(getBlogsById).put(protect, admin, updateBlog).delete(protect, admin, deleteBlog);
 

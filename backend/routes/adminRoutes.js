@@ -46,6 +46,7 @@ import{
   getOfferById,
 } from "../controllers/offerController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
+import { GetAllCabBookings } from "../controllers/CabBookingController.js";
 
 router.route("/blog/allblog").get(protect, admin, getBlogs);
 router.route("/blog/addBlog").post(protect, admin, createBlog);
@@ -96,6 +97,7 @@ router.route("/offer/alloffer/:id")
   // .put(protect, admin, updateCab)
   // router.route("/cab").post(protect, admin, createCab)
   router.post('/hotel/changerole',protect,admin,changerole)
+  router.get('/cab/booking',protect,admin,GetAllCabBookings)
   
 
 export default router;
