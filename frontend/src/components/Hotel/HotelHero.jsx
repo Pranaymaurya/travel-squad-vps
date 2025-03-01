@@ -33,9 +33,18 @@ const HotelHero = () => {
   const navigate = useNavigate();
 
   const handleSearch = () => {
-    navigate("/h", { state: formData });
+    const queryParams = new URLSearchParams({
+      location: formData.location,
+      checkin: formData.checkin,
+      checkout: formData.checkout,
+      guests: formData.guests,
+      price: formData.price,
+    }).toString();
+    
+    
+    navigate(`/h?${queryParams}`);
   };
-
+  
 
   const handleChange = (e) => {
     const { id, value } = e.target;

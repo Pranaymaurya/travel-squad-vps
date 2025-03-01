@@ -8,7 +8,7 @@ const HotelCard = ({hotel}) => {
 
   return (
     <div className="relative flex w-full max-w-[26rem] flex-col rounded-xl bg-white bg-clip-border text-gray-700 shadow-lg">
-      <div className="relative mx-4 mt-4 overflow-hidden text-white shadow-lg rounded-xl bg-blue-gray-500 bg-clip-border shadow-blue-gray-500/40">
+      <div className="relative mx-4 mt-4 overflow-hidden text-black shadow-lg rounded-xl bg-blue-gray-500 bg-clip-border shadow-blue-gray-500/40">
         <img 
         //src={props.image}
         src={`${backendUrl}${imageUrl}`}
@@ -61,7 +61,7 @@ const HotelCard = ({hotel}) => {
               <li className="py-3 sm:py-4">
                 <div className="flex items-center">
                   <div className="flex-1 min-w-0 ms-4">
-                    <p className="text-sm font-bold text-gray-900 truncate dark:text-white">
+                    <p className="text-sm font-bold text-gray-900 truncate dark:text-black">
                        &#8377; {price}
                     </p>
                   </div>
@@ -70,7 +70,7 @@ const HotelCard = ({hotel}) => {
               <li className="py-3 sm:py-4">
                 <div className="flex items-center">
                   <div className="flex-1 min-w-0 ms-4">
-                    <p className="text-sm font-bold text-gray-900 truncate dark:text-white">
+                    <p className="text-sm font-bold text-gray-900 truncate dark:text-black">
                       {location}
                     </p>
                   </div>

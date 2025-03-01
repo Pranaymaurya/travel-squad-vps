@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import HotelSidebar from './HotelSidebar';
 import HotelList from './HotelList';
 import { useLocation } from 'react-router-dom';
@@ -14,27 +14,35 @@ function HotelPage() {
   };
 
   const location = useLocation();
-  const initialFilters = location.state || {
-    //city: "",
-    checkin: formatDate(new Date()),
-    checkout: formatDate(new Date()),
-    guests: "",
-    price: "",
-    location: "",
-    minBudget: "",
-    maxBudget: "",
-    starRating: "",
-    guestRating: "",
-    propertyType: "",
-    amenities: "",
-    facilities: [],
+  const queryParams = new URLSearchParams(location.search);
+
+  const initialFilters = {
+    location: queryParams.get("location") || "",
+    checkin: queryParams.get("checkin") || formatDate(new Date()),
+    checkout: queryParams.get("checkout") || formatDate(new Date()),
+    guests: queryParams.get("guests") || "",
+    price: queryParams.get("price") || "",
+    minBudget: queryParams.get("minBudget") || "",
+    maxBudget: queryParams.get("maxBudget") || "",
+    starRating: queryParams.get("starRating") || "",
+    guestRating: queryParams.get("guestRating") || "",
+    propertyType: queryParams.get("propertyType") || "",
+    amenities: queryParams.get("amenities") || "",
+    facilities: queryParams.get("facilities") ? queryParams.get("facilities").split(",") : [],
   };
+
   const [filters, setFilters] = useState(initialFilters);
+
+  useEffect(() => {
+    setFilters(initialFilters); // Update filters when URL changes
+  }, [location.search]);
+
   return (
-    <div className="flex ">
-      <HotelSidebar filters={filters} setFilters={setFilters} />
-      <HotelList filters={filters} setFilters={setFilters} />
-    </div>
+    <div className="flex">
+  <HotelSidebar filters={filters} setFilters={setFilters} className="w-3/10" />
+  <HotelList filters={filters} setFilters={setFilters} className="w-7/10" />
+</div>
+
   );
 }
 
