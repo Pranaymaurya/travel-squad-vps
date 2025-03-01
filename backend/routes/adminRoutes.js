@@ -38,6 +38,7 @@ import{
   getUserById,
   getUsers,
   deleteUser,
+  changerole,
 } from "../controllers/userController.js"
 import{
   deleteOffer,
@@ -94,6 +95,7 @@ router.route("/offer/alloffer/:id")
   // router.route("/cab/edit/:id").get(protect, admin, getCabsById)
   // .put(protect, admin, updateCab)
   // router.route("/cab").post(protect, admin, createCab)
-
+  router.post('/hotel/changerole',protect,admin,changerole)
+  
 
 export default router;
