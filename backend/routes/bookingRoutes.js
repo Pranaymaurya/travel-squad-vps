@@ -1,6 +1,6 @@
 import {Router} from 'express';
-import { admin, protect } from '../middleware/authMiddleware';
-import { Create, GetAllBooking, GetAllBookingById, GetBookingById, Update, UpdateStatus } from '../controllers/BookingController';
+import { admin, protect } from '../middleware/authMiddleware.js';
+import { Create, GetAllBooking, GetAllBookingById, GetBookingById, Update, UpdateStatus }  from '../controllers/BookingController.js';
 const BookingRouter = Router();
 
 BookingRouter.get('/',protect,admin,GetAllBooking);

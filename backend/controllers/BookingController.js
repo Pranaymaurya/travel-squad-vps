@@ -1,5 +1,5 @@
-import Booking from "../models/booking";
-import Hotel from "../models/hotelModel";
+import Booking from "../models/booking.js";
+import Hotel from "../models/hotelModel.js";
 
 export async function Create(req, res) {
     try {
