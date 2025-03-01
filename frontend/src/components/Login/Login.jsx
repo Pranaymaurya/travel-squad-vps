@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 const Login = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [isActive, setIsActive] = useState(false);
-
+  console.log(backendUrl)
   const handleRegisterClick = () => {
     setIsActive(true);
   };

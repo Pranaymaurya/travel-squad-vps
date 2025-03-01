@@ -197,14 +197,16 @@ function HotelList({ filters, setFilters }) {
   }, [filters]);
 
   return (
-    <div className="w-full md:w-3/4 m-auto bg-white p-4">
-      {/* {hotels.map((hotel, index) => (
-        <HotelCard key={index} hotel={hotel} />
-      ))} */}
-      {Array.isArray(hotelData) && hotelData?.map((hotel, i) => {
-        // console.log(item.id, i);
-        return <HotelCard key={hotel._id} hotel={hotel} filters={filters} setFilters={setFilters} />;
-      })}
+    <div className="w-full md:w-3/4 mx-auto bg-white p-4">
+      {hotelData.length > 0 ? (
+        hotelData.map((hotel) => (
+          <HotelCard key={hotel._id} hotel={hotel} filters={filters} />
+        ))
+      ) : (
+        <p className="text-gray-500 text-center mt-4 md:w-3/4 mx-auto bg-white p-4">
+          No hotels found matching your criteria.
+        </p>
+      )}
     </div>
   );
 }
