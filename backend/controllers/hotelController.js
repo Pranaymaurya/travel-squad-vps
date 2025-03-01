@@ -113,7 +113,7 @@ const updateHotel = asyncHandler(async (req, res) => {
     hotel.roomDetailsAndAmenities = roomDetailsAndAmenities;
     hotel.activitiesAndNearbyAttractions = activitiesAndNearbyAttractions;
     hotel.hotelDetails = hotelDetails;
-    hotel.NumberOfRooms = NumberOfRooms;
+    hotel.NumberofRooms  = NumberOfRooms;
 
     // Save the updated Tour document
     const updatedHotel = await hotel.save();
