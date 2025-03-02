@@ -25,6 +25,20 @@ const userSchema = mongoose.Schema(
       required: true,
       default: false,
     },
+    hotelId:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'Hotel'
+    },
+    cabId:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'Cab'
+    },
+    role: {
+      type: String,
+      enum: ['user', 'admin','hotel','cab'],
+      default: 'user',
+    },
+
   },
   {
     timestamps: true,

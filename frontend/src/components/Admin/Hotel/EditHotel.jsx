@@ -77,7 +77,7 @@ const EditHotel = () => {
           setReviewCount(data.reviewCount);
           setPrice(data.price);
           setTaxes(data.taxes);
-          // setImages(data.images);
+          setImages(data.images);
           setStar(data.star);
           setType(data.type);
           setAmenities(data.amenities);
@@ -606,7 +606,7 @@ const EditHotel = () => {
               {images.map((image, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <img
-                    src={image}
+                    src={`${backendUrl}${image}`}
                     alt={`Image ${index + 1}`}
                     className="w-16 h-16 object-cover"
                   />

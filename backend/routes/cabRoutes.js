@@ -2,12 +2,14 @@ import express from "express";
 const router = express.Router(); 
 import {
   getCabs,
-  getCabsById
+  getCabsById,
+  updateCab
 } from "../controllers/cabController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
 router.route("/").get(getCabs)
-router.route("/:id").get(getCabsById);
+router.route("/:id").get(getCabsById)
+.put(protect, updateCab); 
 // .post( createBlog);
 // router.route("/:id").get(getBlogsById).put(protect, admin, updateBlog).delete(protect, admin, deleteBlog);
 
