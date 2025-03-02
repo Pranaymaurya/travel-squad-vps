@@ -14,9 +14,9 @@ function CabPage() {
 
   const location = useLocation();
   const initialFilters = location.state || {
-     //city: "",
-    //checkin: formatDate(new Date()),
-    //checkout: formatDate(new Date()),
+    // city: "",
+    // checkin: formatDate(new Date()),
+    // checkout: formatDate(new Date()),
     date: formatDate(new Date()),
     hours: new Date().getHours(),
     minutes: new Date().getMinutes(),
@@ -32,14 +32,20 @@ function CabPage() {
     rating: "",
     reviewCount: "",
     originalPrice: "",
-    discountedPrice : "",
-    taxes:"",
+    discountedPrice: "",
+    taxes: "",
   };
+
   const [filters, setFilters] = useState(initialFilters);
+
   return (
-    <div className="flex ">
-      <CabSidebar filters={filters} setFilters={setFilters} />
-      <CabList filters={filters} setFilters={setFilters} />
+    <div className="flex flex-col md:flex-row min-h-screen w-full">
+      <div className="md:w-1/4 w-full md:sticky md:top-0 md:h-screen">
+        <CabSidebar filters={filters} setFilters={setFilters} />
+      </div>
+      <div className="md:w-3/4 w-full">
+        <CabList filters={filters} setFilters={setFilters} />
+      </div>
     </div>
   );
 }

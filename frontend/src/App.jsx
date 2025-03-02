@@ -59,6 +59,8 @@ import EditCab from "./components/Admin/Cab/EditCab";
 import EditHotel from "./components/Admin/Hotel/EditHotel";
 import AddHotel from "./components/Admin/Hotel/AddHotel";
 
+import BookingDashboard from "./components/Admin/Hotel/Hotelbooking";
+
 // import Tourpage from "./components/test/Tourpage";
 function App() {
   const router = createBrowserRouter([
@@ -543,6 +545,14 @@ function App() {
         <>
           <Sidebar />
           <AddHotel />
+        </>
+      ),
+    },{
+      path: "/admin/hotel/bookings",
+      element: (
+        <>
+          <Sidebar />
+          <BookingDashboard/>
         </>
       ),
     },
