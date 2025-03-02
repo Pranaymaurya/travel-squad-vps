@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import {toast} from "react-toastify"
+import { Button } from '@/components/ui/button'; // ShadCN Button
+import { Input } from '@/components/ui/input'; // ShadCN Input
+import { Textarea } from '@/components/ui/textarea'; // ShadCN Textarea
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // ShadCN Select
 
 const AddBlog = () => {
   const [postName, setPostName] = useState('');
@@ -43,10 +46,8 @@ const AddBlog = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-         withCredentials: true 
+        withCredentials: true
       });
-
-      // console.log(response.data);
 
       // Reset form fields after successful submission
       setPostName('');
@@ -55,69 +56,75 @@ const AddBlog = () => {
       setCategory('');
       setAuthorName('');
       setError(null);
-      toast.success("Blog added successfully");
+      // Display success message, you can integrate ShadCN's toast or a simple alert for this.
+      alert('Blog added successfully!');
     } catch (error) {
       console.error('Error adding blog:', error); 
       setError('Error adding blog');
-      toast.error("Error adding blog");
+      alert('Error adding blog');
     }
   };
 
   return (
     <div className="home-section flex flex-col items-center h-screen">
       <div className="bg-white m-5 rounded-sm md:w-4/5 w-full py-10 px-2 md:p-10 overflow-y-auto">
-        <h1 className="text-[1.5rem] sm:text-3xl font-semibold">Add blog</h1>
-        <p className="mb-3 text-[11px] sm:text-[16px]">
-          
-        </p>
+        <h1 className="text-[1.5rem] sm:text-3xl font-semibold">Add Blog</h1>
         {error && <p className="text-red-500">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Blog Name */}
           <div className="flex flex-col">
             <label className="mb-2 font-medium" htmlFor="postName">Blog Name</label>
-            <input
-              type="text"
+            <Input
               id="postName"
-              className="border border-gray-300 rounded-md p-2"
+              type="text"
               value={postName}
               onChange={(e) => setPostName(e.target.value)}
               required
             />
           </div>
+
+          {/* Blog Banner Upload */}
           <div className="flex flex-col">
             <label className="mb-2 font-medium" htmlFor="blogBanner">Upload Blog Banner</label>
-            <input
-              type="file"
+            <Input
               id="blogBanner"
-              className="border border-gray-300 rounded-md p-2"
+              type="file"
               onChange={(e) => setBlogBanner(e.target.files[0])}
               required
             />
           </div>
+
+          {/* Blog Description */}
           <div className="flex flex-col">
             <label className="mb-2 font-medium" htmlFor="blogDescription">Blog Description</label>
-            <textarea
+            <Textarea
               id="blogDescription"
-              className="border border-gray-300 rounded-md p-2"
               value={blogDescription}
               onChange={(e) => setBlogDescription(e.target.value)}
               required
-            ></textarea>
+            />
           </div>
+
+          {/* Category Selection */}
           <div className="flex flex-col">
             <label className="mb-2 font-medium" htmlFor="category">Select Category</label>
-            <select
-              id="category"
-              className="border border-gray-300 rounded-md p-2"
+            <Select
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onValueChange={setCategory}
               required
             >
-              <option value="">Select a category</option>
-              <option value="hotel">Hotel</option>
-              <option value="tour">Tour</option>
-              <option value="cabs">Cabs</option>
-            </select>
+              <SelectTrigger className="border border-gray-300 rounded-md p-2">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="hotel">Hotel</SelectItem>
+                <SelectItem value="tour">Tour</SelectItem>
+                <SelectItem value="cabs">Cabs</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+
+          {/* Featured Checkbox */}
           <div className="flex flex-col">
             <label className="mb-2 font-medium" htmlFor="featured">
               Featured
@@ -130,23 +137,26 @@ const AddBlog = () => {
               onChange={(e) => setFeatured(e.target.checked)}
             />
           </div>
+
+          {/* Author Name */}
           <div className="flex flex-col">
             <label className="mb-2 font-medium" htmlFor="authorName">Author Name</label>
-            <input
-              type="text"
+            <Input
               id="authorName"
-              className="border border-gray-300 rounded-md p-2"
+              type="text"
               value={authorName}
               onChange={(e) => setAuthorName(e.target.value)}
               required
             />
           </div>
-          <button
+
+          {/* Submit Button */}
+          <Button
             type="submit"
             className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
           >
             Submit
-          </button>
+          </Button>
         </form>
       </div>
     </div>
