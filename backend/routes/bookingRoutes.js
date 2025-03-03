@@ -3,7 +3,7 @@ import { AccessRole, admin, protect } from '../middleware/authMiddleware.js';
 import { Create, GetAllBooking, GetAllBookingById, GetBookingById, Update, UpdateStatus }  from '../controllers/BookingController.js';
 const BookingRouter = Router();
 
-BookingRouter.get('/',protect,admin,GetAllBooking);
+
 BookingRouter.get('/:id',protect,GetBookingById);
 BookingRouter.get('/user/:id',protect,GetAllBookingById);
 BookingRouter.post('/create',protect,Create);

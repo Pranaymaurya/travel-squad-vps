@@ -49,7 +49,7 @@ app.use("/api/hotel", hotelRoutes);
 app.use("/api/cab", cabRoutes);
 app.use("/api/offer", offerRoutes);
 app.use('/api/booking',BookingRouter)
-app.use('/api/v1/cab/booking',CabBookingRouter)
+app.use('/api/cab/booking',CabBookingRouter)
 
 const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
