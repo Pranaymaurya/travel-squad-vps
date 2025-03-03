@@ -3,12 +3,12 @@ import mongoose from "mongoose";
 const cabBookingBookingSchema = new mongoose.Schema(
   {
     cab: {
-      type: Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Cab",
       required: true,
     },
     user: {
-      type: Schema.Types.ObjectId,
+      type:mongoose. Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },

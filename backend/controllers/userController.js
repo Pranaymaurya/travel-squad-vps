@@ -9,19 +9,16 @@ const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email },) ;
   
  
   if (user && (await user.matchPassword(password))) {
-    generateToken(res, user._id);
+    user.password=undefined
+    console.log(user);
+    
+    generateToken(res, user);
 
-    res.status(200).json({
-      _id: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      isAdmin: user.isAdmin,
-    });
+    res.status(200).json(user);
   } else {
     res.status(401);
     throw new Error("Invalid email or password");
@@ -181,10 +178,14 @@ const changerole=asyncHandler(async(req,res)=>{
   }
     user.role=role;
     if(role==='cab'){
+      const checkCab=await Cab.findOne({user:userId})
+      if(checkCab) return res.status(400).json({message:"Cab Already Exist"})
       const cab=await Cab.create({name,user:user._id})
       cab.save()
     }
     else if(role==='hotel'){
+      const checkHotel=await Hotel.findOne({user:userId})
+      if(checkHotel) return res.status(400).json({message:"Hotel Already Exist"})
       const hotel=await Hotel.create({name,user:user._id})
       hotel.save()
     }
