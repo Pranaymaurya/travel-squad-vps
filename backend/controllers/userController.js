@@ -188,7 +188,11 @@ const changerole=asyncHandler(async(req,res)=>{
       if(checkHotel) return res.status(400).json({message:"Hotel Already Exist"})
       const hotel=await Hotel.create({name,user:user._id})
       hotel.save()
+    }else {
+      const isExistCab=await Cab.findOneAndDelete({user:userId})
+      const isExistHotel=await Hotel.findOneAndDelete({user:userId})
     }
+  
   await user.save();
   res.json(user);
   } catch (error) {
