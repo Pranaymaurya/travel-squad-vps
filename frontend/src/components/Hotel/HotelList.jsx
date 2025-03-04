@@ -5,53 +5,40 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
  
-function HotelCard({ hotel, filters, setFilters }) {
+// import React from 'react';
+// import PropTypes from "prop-types";
+// import { useNavigate } from "react-router-dom";
+// import { useEffect, useState } from "react";
+// import axios from "axios";
 
-  // const {
-  //   //city: "",
-  //   checkin,
-  //   checkout,
-  //   guests,
-  //   price,
-  //   location,
-  //   minBudget,
-  //   maxBudget,
-  //   starRating,
-  //   guestRating,
-  //   propertyType,
-  //   amenities,
-  //   facilities,
-  // } = filters
-
+function HotelCard({ hotel, filters }) {
   const navigate = useNavigate();
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const handleSearch = () => {
     navigate(`/hotel/${hotel._id}`, { state: filters });
   };
 
-
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   return (
-    //<Link to={`/hotel/${hotel._id}`} >
-      <div className="border border-red-200 items-center justify-center rounded-lg p-4 shadow bg-white mb-4 flex flex-col md:flex-row ">
-      <div className="md:flex-shrink-0  ">
+    <div className="border border-gray-200 rounded-lg p-4 shadow bg-white mb-4 flex flex-col md:flex-row hover:shadow-lg transition-shadow duration-300">
+      <div className="md:flex-shrink-0">
         <img
-          //src={hotel.imageUrl}
           src={`${backendUrl}${hotel.imageUrl}`}
           alt={`Image of ${hotel.name}`}
-          className="h-48 w-full md:w-48 object-cover md:rounded-lg "
+          className="h-48 w-full md:w-48 object-cover rounded-lg"
         />
-        <div className="flex items-center gap-3 mt-2">
-          {hotel.images.map((imgSrc, index) => (
+        <div className="flex items-center gap-2 mt-2">
+          {hotel.images.slice(0, 3).map((imgSrc, index) => (
             <img
               key={index}
-              // src={imgSrc}
               src={`${backendUrl}${imgSrc}`}
               alt={`Additional view ${index + 1}`}
               className="h-12 w-12 object-cover rounded-lg"
             />
           ))}
-          <div className="text-blue-600 text-sm cursor-pointer">View All</div>
+          {hotel.images.length > 3 && (
+            <div className="text-blue-600 text-sm cursor-pointer">View All</div>
+          )}
         </div>
       </div>
       <div className="mt-4 md:mt-0 md:ml-4 flex-grow flex flex-col justify-between">
@@ -62,7 +49,7 @@ function HotelCard({ hotel, filters, setFilters }) {
             </span>
             <h3 className="font-bold text-lg ml-2">{hotel.name}</h3>
           </div>
-          <p className="text-sm text-blue-500">
+          <p className="text-sm text-blue-500 mt-1">
             {hotel.location} | {hotel.distance}
           </p>
           <p className="text-xs bg-gray-200 inline-block rounded px-2 py-1 mt-1">
@@ -73,8 +60,8 @@ function HotelCard({ hotel, filters, setFilters }) {
             Avail 15% discount on spa, food & beverages
           </p>
         </div>
-        <div className="mt-4 flex justify-between items-end">
-          <div>
+        <div className="mt-4 flex flex-col md:flex-row justify-between items-end">
+          <div className="flex items-center mb-2 md:mb-0">
             <span className="bg-blue-100 text-blue-800 font-semibold py-1 px-2 rounded">
               {hotel.rating}
             </span>
@@ -82,20 +69,22 @@ function HotelCard({ hotel, filters, setFilters }) {
               ({hotel.reviewCount} Ratings)
             </span>
           </div>
-          <div>
+          <div className="text-right mb-2 md:mb-0">
             <p className="text-lg font-bold">₹ {hotel.price}</p>
             <p className="text-sm text-gray-500">
               + ₹ {hotel.taxes} taxes & fees
             </p>
             <p className="text-sm">Per Night</p>
           </div>
-          <button onClick={handleSearch} className="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          <button
+            onClick={handleSearch}
+            className="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-300"
+          >
             Login to Book Now & Pay Later!
           </button>
         </div>
       </div>
     </div>
-    //</Link>
   );
 }
 
@@ -112,6 +101,7 @@ HotelCard.propTypes = {
     taxes: PropTypes.number.isRequired,
     images: PropTypes.arrayOf(PropTypes.string).isRequired,
   }).isRequired,
+  filters: PropTypes.object.isRequired,
 };
 
 // export default HotelCard;

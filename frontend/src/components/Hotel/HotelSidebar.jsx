@@ -89,11 +89,11 @@ function HotelSidebar({ filters, setFilters }) {
     <>
       {/* Mobile toggle button with fixed styling */}
       <button
-        className="md:hidden fixed top-4 left-4 z-40 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-md"
-        onClick={toggleSidebar}
-      >
-        Filter Options
-      </button>
+  className="md:hidden fixed bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg"
+  onClick={toggleSidebar}
+>
+  Filters
+</button>
 
       {/* Sidebar container with fixed positioning on mobile */}
       <div

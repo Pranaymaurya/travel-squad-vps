@@ -166,7 +166,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
 const changerole=asyncHandler(async(req,res)=>{
   try {
-     const {role,userId,name}=req.body;
+     const {role,userId}=req.body;
   if(role!=='cab' && role!=='hotel'  && role!=='user'){
     res.status(404);
     throw new Error("Role is required");
@@ -180,13 +180,13 @@ const changerole=asyncHandler(async(req,res)=>{
     if(role==='cab'){
       const checkCab=await Cab.findOne({user:userId})
       if(checkCab) return res.status(400).json({message:"Cab Already Exist"})
-      const cab=await Cab.create({name,user:user._id})
+      const cab=await Cab.create({user:user._id})
       cab.save()
     }
     else if(role==='hotel'){
       const checkHotel=await Hotel.findOne({user:userId})
       if(checkHotel) return res.status(400).json({message:"Hotel Already Exist"})
-      const hotel=await Hotel.create({name,user:user._id})
+      const hotel=await Hotel.create({user:user._id})
       hotel.save()
     }else {
       const isExistCab=await Cab.findOneAndDelete({user:userId})
