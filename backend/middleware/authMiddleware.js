@@ -14,6 +14,7 @@ const protect = asyncHandler(async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       req.user = await User.findById(decoded.userId).select("-password");
+console.log(decoded);
 
       next();
     } catch (error) {
@@ -39,4 +40,11 @@ const admin = (req, res, next) => {
   }
 };
 
-export { protect, admin };
+const AccessRole=(roles)=>{
+  return (req,res,next) =>{
+if(!roles.includes(req.user.role)) return res.status(400).json({message:"Access Denied"})
+next()
+  }
+}
+
+export { protect, admin ,AccessRole};
