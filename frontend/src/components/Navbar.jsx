@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
 import axios from "axios";
@@ -8,6 +8,8 @@ const Navbar = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,6 +19,7 @@ const Navbar = () => {
           withCredentials: true,
         });
         setUser(data);
+        console.log(data)
       } catch (error) {
         console.error("Not authenticated");
         setUser(null);
@@ -24,6 +27,19 @@ const Navbar = () => {
     };
 
     fetchUser();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -38,7 +54,21 @@ const Navbar = () => {
   };
 
   const handleAccountClick = () => {
-    navigate(user ? "/account" : "/login");
+    navigate("/login");
+  };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
+
+  const navigateToProfile = () => {
+    navigate("/account");
+    setDropdownOpen(false);
+  };
+
+  const navigateToBookings = () => {
+    navigate("/bookings");
+    setDropdownOpen(false);
   };
 
   return (
@@ -53,24 +83,64 @@ const Navbar = () => {
             </a>
           </div>
 
-          {/* **Admin Panel Button** */}
-          {user?.isAdmin && (
-            <Link to="/admin">
-              <button className="bg-blue-500 text-white border-2 border-blue-500 rounded-full px-4 py-2 shadow-md hover:bg-blue-700 hover:border-blue-700 transition duration-300">
-                Go to Admin Panel
-              </button>
-            </Link>
-          )}
-
-          {/* **User Authentication Button** */}
+          {/* **User Authentication Button or Dropdown** */}
           <div className="flex items-center space-x-6">
             {user ? (
-              <button
-                onClick={handleLogout}
-                className="bg-green-500 text-white border-2 border-green-500 rounded-full px-4 py-2 shadow-md hover:bg-green-700 hover:border-green-700 transition duration-300"
-              >
-                Logout {user.firstName}
-              </button>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={toggleDropdown}
+                  className="bg-green-500 text-white border-2 border-green-500 rounded-full px-4 py-2 shadow-md hover:bg-green-700 hover:border-green-700 transition duration-300 flex items-center"
+                >
+                  <i className="bx bxs-user pr-2"></i>
+                  {/* {user.firstName} */}
+                  <svg
+                    className={`w-4 h-4 ml-2 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+                
+                {/* Dropdown Menu */}
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
+                    <button
+                      onClick={navigateToProfile}
+                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-150"
+                    >
+                      <i className="bx bxs-user-circle mr-2"></i>Profile
+                    </button>
+                    <button
+                      onClick={navigateToBookings}
+                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-150"
+                    >
+                      <i className="bx bxs-calendar mr-2"></i>My Bookings
+                    </button>
+                    {user?.role === "admin" && (
+                      <>
+                        <hr className="my-1" />
+                        <Link to="/admin">
+                          <button
+                            className="block w-full text-left px-4 py-2 text-blue-600 hover:bg-gray-100 transition duration-150"
+                          >
+                            <i className="bx bxs-cog mr-2"></i>Admin Panel
+                          </button>
+                        </Link>
+                      </>
+                    )}
+                    <hr className="my-1" />
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 transition duration-150"
+                    >
+                      <i className="bx bx-log-out mr-2"></i>Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <button
                 onClick={handleAccountClick}
@@ -89,7 +159,7 @@ const Navbar = () => {
           {/* **Hamburger Menu for Mobile** */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden inline-flex items-center justify-center p-2 w-10 h-10 text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
+            className="md:hidden inline-flex items-center justify-center p-2 w-10 h-10 text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none bg-gray-100 focus:ring-gray-200"
             aria-controls="navbar-hamburger"
             aria-expanded={menuOpen}
           >
@@ -114,13 +184,7 @@ const Navbar = () => {
           {/* **Navigation Links** */}
           <div className={`${menuOpen ? "block" : "hidden"} md:flex md:w-auto m-auto`} id="navbar-hamburger">
             <ul className="flex flex-col md:flex-row md:space-x-8 font-medium mt-4 md:mt-0">
-              {[
-                { path: "/", label: "Home" },
-                { path: "/tour", label: "Tour Packages" },
-                { path: "/cab", label: "Cabs" },
-                { path: "/hotel", label: "Hotels" },
-                { path: "/blog", label: "Blogs" },
-              ].map((item, index) => (
+              {[{ path: "/", label: "Home" }, { path: "/tour", label: "Tour Packages" }, { path: "/cab", label: "Cabs" }, { path: "/hotel", label: "Hotels" }, { path: "/blog", label: "Blogs" }].map((item, index) => (
                 <li key={index}>
                   <a
                     href={item.path}

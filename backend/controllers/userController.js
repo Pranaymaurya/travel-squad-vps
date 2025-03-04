@@ -21,6 +21,7 @@ const authUser = asyncHandler(async (req, res) => {
       lastName: user.lastName,
       email: user.email,
       isAdmin: user.isAdmin,
+     
     });
   } else {
     res.status(401);
@@ -88,6 +89,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         isAdmin: user.isAdmin,
+        role:user.role
       });
     } else {
       res.status(404);

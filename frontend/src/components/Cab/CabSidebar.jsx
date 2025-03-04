@@ -1,10 +1,22 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import PropTypes from 'prop-types';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import PropTypes from "prop-types";
 
 function CabSidebar({ filters, setFilters }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Extract filters from query parameters
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const initialFilters = {
+      type: searchParams.getAll("type") || [],
+      fuelType: searchParams.getAll("fuelType") || [],
+      seats: searchParams.getAll("seats") || [],
+    };
+    setFilters(initialFilters);
+  }, [location.search, setFilters]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -13,7 +25,7 @@ function CabSidebar({ filters, setFilters }) {
   const handleFilterChange = (category, value, checked) => {
     setFilters((prevFilters) => {
       const currentValues = [...prevFilters[category]];
-      
+
       if (checked) {
         // Add value if checked and not already included
         if (!currentValues.includes(value)) {
@@ -21,20 +33,30 @@ function CabSidebar({ filters, setFilters }) {
         }
       } else {
         // Remove value if unchecked
-        return { 
-          ...prevFilters, 
-          [category]: currentValues.filter(item => item !== value) 
+        return {
+          ...prevFilters,
+          [category]: currentValues.filter((item) => item !== value),
         };
       }
-      
+
       return prevFilters;
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate('/c', { state: filters });
+    // Generate the query string based on the filters
+    const queryParams = new URLSearchParams();
+    Object.keys(filters).forEach((category) => {
+      if (filters[category].length > 0) {
+        filters[category].forEach((value) => {
+          queryParams.append(category, value);
+        });
+      }
+    });
+    navigate(`/c?${queryParams.toString()}`);
     console.log("Applied filters:", filters);
+
     // On mobile, close the sidebar after applying filters
     if (isSidebarOpen) toggleSidebar();
   };
@@ -42,16 +64,18 @@ function CabSidebar({ filters, setFilters }) {
   return (
     <div className="w-full h-full relative">
       {/* Mobile filter toggle button */}
-      <button
-        className="md:hidden z-50 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg pb-3"
-        onClick={toggleSidebar}
-      >
-        {isSidebarOpen ? "Hide Filters" : "Show Filters"}
-      </button>
+      <div className="md:hidden flex justify-center items-center h-full">
+        <button
+          className="md:hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg w-24 mt-5"
+          onClick={toggleSidebar}
+        >
+          Filters
+        </button>
+      </div>
 
       {/* Overlay for mobile */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={toggleSidebar}
         />
@@ -66,6 +90,7 @@ function CabSidebar({ filters, setFilters }) {
         <h2 className="font-bold text-lg mb-4">Select Filters</h2>
         <form onSubmit={handleSubmit}>
           <div className="space-y-6">
+            {/* Car Type Filters */}
             <div>
               <label className="block text-gray-700 text-sm font-bold mb-2">
                 Car Type
@@ -103,7 +128,8 @@ function CabSidebar({ filters, setFilters }) {
                 </label>
               </div>
             </div>
-            
+
+            {/* Fuel Type Filters */}
             <div>
               <label className="block text-gray-700 text-sm font-bold mb-2">
                 Fuel Type
@@ -141,7 +167,8 @@ function CabSidebar({ filters, setFilters }) {
                 </label>
               </div>
             </div>
-            
+
+            {/* Seats Filters */}
             <div>
               <label className="block text-gray-700 text-sm font-bold mb-2">
                 Seats
@@ -190,15 +217,16 @@ function CabSidebar({ filters, setFilters }) {
               </div>
             </div>
           </div>
-          
-          <button 
+
+          {/* Apply Filters Button */}
+          <button
             type="submit"
             className="mt-6 w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
             Apply Filters
           </button>
         </form>
-        
+
         {/* Mobile only close button at the bottom */}
         <button
           className="md:hidden mt-4 w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"

@@ -40,7 +40,7 @@ const DNavbar = () => {
             <i className="bx bxs-user pl-2"></i> My Account
           </a>
         </div>
-        <div className="md:hidden z-[9999999999999999999]">
+        <div className="md:hidden ">
           <button id="mobile-menu-toggle" onClick={toggleMobileMenu}>
             {isMobileMenuOpen ? (
               <i className="bx bx-x text-3xl text-white"></i>

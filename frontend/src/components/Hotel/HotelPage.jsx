@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import HotelSidebar from './HotelSidebar';
 import HotelList from './HotelList';
-import { useLocation } from 'react-router-dom';
 
 function HotelPage() {
-
   const formatDate = (date) => {
     const d = new Date(date);
     const year = d.getFullYear();
@@ -27,22 +26,25 @@ function HotelPage() {
     starRating: queryParams.get("starRating") || "",
     guestRating: queryParams.get("guestRating") || "",
     propertyType: queryParams.get("propertyType") || "",
-    amenities: queryParams.get("amenities") || "",
+    amenities: queryParams.get("amenities") ? queryParams.get("amenities").split(",") : [],
     facilities: queryParams.get("facilities") ? queryParams.get("facilities").split(",") : [],
   };
 
   const [filters, setFilters] = useState(initialFilters);
 
   useEffect(() => {
-    setFilters(initialFilters); // Update filters when URL changes
+    setFilters(initialFilters);
   }, [location.search]);
 
   return (
-    <div className="flex">
-  <HotelSidebar filters={filters} setFilters={setFilters} className="w-3/10" />
-  <HotelList filters={filters} setFilters={setFilters} className="w-7/10" />
-</div>
-
+    <div className="flex flex-col md:flex-row min-h-screen w-full">
+      <aside className="md:w-1/4 w-full md:sticky md:top-0 md:h-screen">
+        <HotelSidebar filters={filters} setFilters={setFilters} />
+      </aside>
+      <main className="md:w-3/4 w-full">
+        <HotelList filters={filters} setFilters={setFilters} />
+      </main>
+    </div>
   );
 }
 

@@ -132,7 +132,7 @@ function App() {
       ),
     })),
     {
-      path: "/h",
+      path: "/hotels",
       element: (
         <>
           <Navbar />
