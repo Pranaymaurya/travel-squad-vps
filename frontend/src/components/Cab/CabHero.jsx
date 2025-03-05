@@ -42,8 +42,21 @@ const CabHero = () => {
   const navigate = useNavigate();
 
   const handleSearch = () => {
-    navigate("/c", { state: formData });
+    const queryParams = new URLSearchParams();
+  
+    Object.keys(formData).forEach((key) => {
+      const value = formData[key];
+      if (Array.isArray(value)) {
+        value.forEach((item) => queryParams.append(key, item)); // Append array values
+      } else {
+        queryParams.append(key, value);
+      }
+    });
+  
+    navigate(`/c?${queryParams.toString()}`);
   };
+  
+  
 
   const handleChange = (e) => {
     const { id, value } = e.target;

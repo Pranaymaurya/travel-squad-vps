@@ -66,7 +66,7 @@ function HotelSidebar({ filters, setFilters }) {
     // }
 
     console.log("Generated Query String:", queryParams.toString());
-    navigate(`/h?${queryParams.toString()}`);
+    navigate(`/hotels?${queryParams.toString()}`);
     
     // Close sidebar on mobile after submitting
     if (window.innerWidth < 768) {
@@ -88,18 +88,24 @@ function HotelSidebar({ filters, setFilters }) {
   return (
     <>
       {/* Mobile toggle button with fixed styling */}
-      <button
-  className="md:hidden fixed bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg"
-  onClick={toggleSidebar}
->
-  Filters
-</button>
+      <div className="md:hidden flex justify-center items-center h-full">
+        <button
+          className="md:hidden bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full shadow-lg w-24 mt-5"
+          onClick={toggleSidebar}
+        >
+          Filters
+        </button>
+      </div>
+
+
+
+
 
       {/* Sidebar container with fixed positioning on mobile */}
       <div
-        className={`fixed md:static top-0 left-0 h-full md:h-auto z-30 transform ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 transition-transform duration-300 ease-in-out md:block bg-white w-64 md:w-1/4 p-5 shadow-lg md:shadow-md overflow-y-auto`}
+        className={`${
+          isSidebarOpen ? "fixed inset-0 pt-16" : "hidden"
+        } md:block bg-white w-full h-full md:h-auto overflow-y-auto p-4 z-40 md:z-auto md:pt-0`}
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-bold text-lg">Filters</h2>

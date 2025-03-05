@@ -40,6 +40,7 @@ const Sidebar = () => {
           withCredentials: true,
         })
         setUser (data)
+        console.log(data)
       } catch (error) {
         console.error("User  not authenticated")
         setUser (null)

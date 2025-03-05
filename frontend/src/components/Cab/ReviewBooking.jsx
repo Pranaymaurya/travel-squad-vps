@@ -48,7 +48,10 @@ const ReviewBooking = () => {
 
   const [usePickupAsBilling, setUsePickupAsBilling] = useState(false);
   const [pickupAddress, setPickupAddress] = useState("");
-  const [dropoffAddress, setDropoffAddress] = useState("");
+  const [pickuptime, setPickuptime] = useState("")
+  const [dropofftime, setDropofftime] = useState("");
+ 
+  const [dropoffAddress,  setDropoffAddress] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [gender, setGender] = useState("");
@@ -57,6 +60,7 @@ const ReviewBooking = () => {
   const [couponCode, setCouponCode] = useState("");
   const [amount, setAmount] = useState(data[0].paymentAmount); // using the amount from JSON
   const halfAmount = amount / 2;
+  
 
   const handleCheckboxChange = () => {
     setUsePickupAsBilling(!usePickupAsBilling);
@@ -85,6 +89,39 @@ const ReviewBooking = () => {
     };
     fetchCabData();
   }, [p.id]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent the default form submission
+
+    const bookingData = {
+      pickupLocation:pickupAddress,
+      dropoffLocation:dropoffAddress,
+      pickupTime:pickuptime,
+      dropofftime,
+      // usePickupAsBilling,
+      // name,
+      // email,
+      // gender,
+      // contactNumber,
+      // paymentType,
+      // couponCode,
+      totalAmount: discountedPrice
+      ,
+      cab:p.id,
+      // filters,
+      // cabData,
+    };
+
+    try {
+      console.log(bookingData)
+      const response = await axios.post(`${backendUrl}/api/cab/booking/create`, bookingData, { withCredentials: true });
+      console.log("Booking successful:", response.data);
+      // Handle success (e.g., redirect to a confirmation page)
+    } catch (error) {
+      console.error("Error sending booking data:", error);
+      // Handle error (e.g., show an error message)
+    }
+  };
 
   
 
@@ -194,7 +231,7 @@ const ReviewBooking = () => {
           </div>
           <div className="border border-slate-400 rounded-md p-4 mb-4">
             <h4 className="text-lg font-semibold mb-4">Trip Details</h4>
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className="mb-4">
                 <label className="block mb-2">Pick-up Address</label>
                 <input
@@ -214,6 +251,24 @@ const ReviewBooking = () => {
                 />
               </div>
               <div className="mb-4">
+                <label className="block mb-2">Pick-up Time</label>
+                <input
+                  type="text"
+                  className="w-full p-2 border border-gray-300 rounded"
+                  value={pickuptime}
+                  onChange={(e) => setPickuptime(e.target.value)}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block mb-2">Drop-off Time</label>
+                <input
+                  type="text"
+                  className="w-full p-2 border border-gray-300 rounded"
+                  value={dropofftime}
+                  onChange={(e) => setDropofftime(e.target.value)}
+                />
+              </div>
+              <div className="mb-4">
                 <input
                   type="checkbox"
                   id="billing-address"
@@ -225,7 +280,7 @@ const ReviewBooking = () => {
                   Use pickup location as billing address
                 </label>
               </div>
-              <h4 className="text-lg font-semibold mb-4">
+              {/* <h4 className="text-lg font-semibold mb-4">
                 Confirm Traveller Information
               </h4>
               <div className="mb-4">
@@ -267,7 +322,14 @@ const ReviewBooking = () => {
                   value={contactNumber}
                   onChange={(e) => setContactNumber(e.target.value)}
                 />
+              </div> */}
+              <div className="mb-4">
+                <button type="submit" className="text-lg font-semibold bg-sky-950 hover:bg-sky-700 text-white rounded p-3 w-full">
+                  Amount: ₹ {discountedPrice}
+
+                </button>
               </div>
+
             </form>
           </div>
           <div className="border border-slate-400 rounded-md p-4 mb-4">
@@ -379,7 +441,8 @@ const ReviewBooking = () => {
               </div>
               <div className="mb-4">
                 <button className="text-lg font-semibold bg-sky-950 hover:bg-sky-700 text-white rounded p-3 w-full">
-                  Amount: ₹ {paymentType === "half" ? halfAmount : amount}
+                  Amount: ₹ {discountedPrice
+                  }
                 </button>
               </div>
               <div className="text-green-600">
