@@ -1,6 +1,7 @@
 import express from "express";
 const router = express.Router(); 
 import {
+  GetHotelByUserId,
   getHotels,
   getHotelsById,
   updateHotel,
@@ -12,6 +13,8 @@ router.route("/").get(getHotels)
 router.route("/:id")
 .get(getHotelsById)
 .put(protect,AccessRole(['admin','hotel']), updateHotel);
+
+router.get('/user/:id',GetHotelByUserId)
 
 router.put("/room/:id",protect,AccessRole(['admin','hotel']),UpdateRoom)
 // .post( createBlog);
