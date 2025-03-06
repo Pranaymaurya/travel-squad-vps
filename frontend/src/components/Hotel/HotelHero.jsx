@@ -42,7 +42,7 @@ const HotelHero = () => {
     }).toString();
     
     
-    navigate(`/h?${queryParams}`);
+    navigate(`/hotels?${queryParams}`);
   };
   
 

@@ -21,11 +21,11 @@ const cabBookingBookingSchema = new mongoose.Schema(
       required: true,
     },
     pickupTime: {
-      type: Date,
+      type: String,
       required: true,
     },
     dropoffTime: {
-      type: Date,
+      type: String,
     },
     status: {
       type: String,
