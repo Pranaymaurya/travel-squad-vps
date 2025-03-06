@@ -229,4 +229,14 @@ const UpdateRoom=async(req,res)=>{
   }
 }
 
-export { getHotels, getHotelsById, deleteHotel, updateHotel, createHotel,UpdateRoom };
+const GetHotelByUserId=async (req,res)=>{
+  try {
+    const hotel=await Hotel.findOne({user:req.params.id})
+    if(hotel) return res.status(200).json(hotel)
+      res.status(400).json({success:false,message:"user Not Found"})
+  } catch (error) {
+    res.status(500).json({success:false,message:"Internal Server Error"})
+  }
+}
+
+export { getHotels, getHotelsById, deleteHotel, updateHotel, createHotel,UpdateRoom,GetHotelByUserId };
