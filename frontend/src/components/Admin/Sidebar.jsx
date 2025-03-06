@@ -1,5 +1,7 @@
+"use client"
+
 import { useState, useEffect } from "react"
-import { Link, Outlet, Navigate } from "react-router-dom"
+import { Link, Outlet } from "react-router-dom"
 import axios from "axios"
 import Login from "../Login/Login"
 
@@ -37,36 +39,57 @@ const ROUTE_ACCESS = {
     cabs: true,
     blogs: true,
     offers: true,
-    enquiry: true,
+    enquiry: {
+      tour: true,
+      hotel: true,
+      cab: true,
+    },
     analytics: true,
-    chart: true
+    chart: true,
   },
   hotel: {
     dashboard: true,
-    hotels: true,
+    hotels: {
+      view: true,
+      update: true,
+    },
     enquiry: {
-      hotel: true
-    }
+      hotel: true,
+    },
   },
   tour: {
     dashboard: true,
-    tours: true,
+    tours: {
+      view: true,
+      update: true,
+    },
     enquiry: {
-      tour: true
-    }
+      tour: true,
+    },
   },
   cab: {
     dashboard: true,
-    cabs: true,
+    cabs: {
+      view: true,
+      update: true,
+    },
     enquiry: {
-      cab: true
-    }
+      cab: true,
+    },
   },
   content: {
     dashboard: true,
-    blogs: true,
-    offers: true
-  }
+    blogs: {
+      view: true,
+      create: true,
+      update: true,
+    },
+    offers: {
+      view: true,
+      create: true,
+      update: true,
+    },
+  },
 }
 
 const Sidebar = () => {
@@ -82,7 +105,7 @@ const Sidebar = () => {
           withCredentials: true,
         })
         setUser(data)
-        console.log(data)
+        // console.log(data)
       } catch (error) {
         console.error("User not authenticated")
         setUser(null)
@@ -93,7 +116,7 @@ const Sidebar = () => {
   }, [backendUrl])
 
   const toggleMenu = (menuName) => {
-    setExpandedMenu((prev) => (prev === menuName ? null : menuName));
+    setExpandedMenu((prev) => (prev === menuName ? null : menuName))
   }
 
   const toggleSidebar = () => {
@@ -101,20 +124,34 @@ const Sidebar = () => {
   }
 
   // Check if a specific route/feature is accessible
-  const canAccessRoute = (route, subRoute = null) => {
-    if (!user) return false;
-    
-    const userAccess = ROUTE_ACCESS[user.role] || {};
-    
-    if (subRoute) {
-      return userAccess[route]?.[subRoute] || false;
+  const canAccessRoute = (route, subRoute = null, action = null) => {
+    if (!user) return false
+
+    const userAccess = ROUTE_ACCESS[user.role] || {}
+
+    if (!userAccess[route]) return false
+
+    if (subRoute && action) {
+      return userAccess[route]?.[subRoute]?.[action] || false
     }
-    
-    return userAccess[route] || false;
+
+    if (subRoute) {
+      // If subRoute is specified but userAccess[route] is just a boolean
+      if (typeof userAccess[route] === "boolean") {
+        return userAccess[route]
+      }
+      return userAccess[route]?.[subRoute] || false
+    }
+
+    if (action && typeof userAccess[route] === "object") {
+      return userAccess[route]?.[action] || false
+    }
+
+    return typeof userAccess[route] === "boolean" ? userAccess[route] : Object.keys(userAccess[route]).length > 0
   }
 
-  const renderDashboardMenu = () => (
-    canAccessRoute('dashboard') && (
+  const renderDashboardMenu = () =>
+    canAccessRoute("dashboard") && (
       <Button
         variant="ghost"
         className={`flex justify-start items-center w-full mb-1 text-white ${!sidebarOpen && "justify-center px-2"} hover:bg-gray-700 hover:text-white`}
@@ -126,10 +163,9 @@ const Sidebar = () => {
         </Link>
       </Button>
     )
-  )
 
-  const renderUsersMenu = () => (
-    canAccessRoute('users') && (
+  const renderUsersMenu = () =>
+    canAccessRoute("users") && (
       <Collapsible open={expandedMenu === "users"} onOpenChange={() => toggleMenu("users")} className="mb-1">
         <CollapsibleTrigger asChild>
           <Button
@@ -156,10 +192,9 @@ const Sidebar = () => {
         )}
       </Collapsible>
     )
-  )
 
-  const renderToursMenu = () => (
-    canAccessRoute('tours') && (
+  const renderToursMenu = () =>
+    canAccessRoute("tours") && (
       <Collapsible open={expandedMenu === "tours"} onOpenChange={() => toggleMenu("tours")} className="mb-1">
         <CollapsibleTrigger asChild>
           <Button
@@ -179,20 +214,23 @@ const Sidebar = () => {
         </CollapsibleTrigger>
         {sidebarOpen && (
           <CollapsibleContent className="pl-7 py-1">
-            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
-              <Link to="/admin/tour/alltour">All Packages</Link>
-            </Button>
-            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
-              <Link to="/admin/tour/addtour">Add New Package</Link>
-            </Button>
+            {(user.role === "admin" || canAccessRoute("tours", "view")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/tour/alltour">All Packages</Link>
+              </Button>
+            )}
+            {(user.role === "admin" || canAccessRoute("tours", "update")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/tour/addtour">Add New Package</Link>
+              </Button>
+            )}
           </CollapsibleContent>
         )}
       </Collapsible>
     )
-  )
 
-  const renderHotelsMenu = () => (
-    canAccessRoute('hotels') && (
+  const renderHotelsMenu = () =>
+    canAccessRoute("hotels") && (
       <Collapsible open={expandedMenu === "hotels"} onOpenChange={() => toggleMenu("hotels")} className="mb-1">
         <CollapsibleTrigger asChild>
           <Button
@@ -212,20 +250,33 @@ const Sidebar = () => {
         </CollapsibleTrigger>
         {sidebarOpen && (
           <CollapsibleContent className="pl-7 py-1">
-            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
-              <Link to="/admin/hotel/allhotel">All Hotels</Link>
-            </Button>
-            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
-              <Link to="/admin/hotel/addhotel">Add Hotel</Link>
-            </Button>
+            {(user.role === "admin" || canAccessRoute("view")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/hotel/allhotel">All Hotels</Link>
+              </Button>
+            )}
+            {(user.role === "hotel" || canAccessRoute("hotels", "update")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/hotel/user">Hotel Update</Link>
+              </Button>
+            )}
+            {(user.role === "hotel" || canAccessRoute("hotels", "view")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/hotel/userview">Hotel View</Link>
+              </Button>
+            )}
+            {user.role === "admin" && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/hotel/addhotel">Add Hotel</Link>
+              </Button>
+            )}
           </CollapsibleContent>
         )}
       </Collapsible>
     )
-  )
 
-  const renderCabsMenu = () => (
-    canAccessRoute('cabs') && (
+  const renderCabsMenu = () =>
+    canAccessRoute("cabs") && (
       <Collapsible open={expandedMenu === "cabs"} onOpenChange={() => toggleMenu("cabs")} className="mb-1">
         <CollapsibleTrigger asChild>
           <Button
@@ -245,20 +296,23 @@ const Sidebar = () => {
         </CollapsibleTrigger>
         {sidebarOpen && (
           <CollapsibleContent className="pl-7 py-1">
-            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
-              <Link to="/admin/cab/allcab">All Cabs</Link>
-            </Button>
-            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
-              <Link to="/admin/cab/addcab">Add a Cab</Link>
-            </Button>
+            {(user.role === "admin" || canAccessRoute("cabs", "view")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/cab/allcab">All Cabs</Link>
+              </Button>
+            )}
+            {(user.role === "admin" || canAccessRoute("cabs", "update")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/cab/addcab">Add a Cab</Link>
+              </Button>
+            )}
           </CollapsibleContent>
         )}
       </Collapsible>
     )
-  )
 
-  const renderBlogsMenu = () => (
-    canAccessRoute('blogs') && (
+  const renderBlogsMenu = () =>
+    canAccessRoute("blogs") && (
       <Collapsible open={expandedMenu === "blogs"} onOpenChange={() => toggleMenu("blogs")} className="mb-1">
         <CollapsibleTrigger asChild>
           <Button
@@ -278,20 +332,23 @@ const Sidebar = () => {
         </CollapsibleTrigger>
         {sidebarOpen && (
           <CollapsibleContent className="pl-7 py-1">
-            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
-              <Link to="/admin/blog/allblog">All Blogs</Link>
-            </Button>
-            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
-              <Link to="/admin/blog/addblog">Add Blogs</Link>
-            </Button>
+            {(user.role === "admin" || canAccessRoute("blogs", "view")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/blog/allblog">All Blogs</Link>
+              </Button>
+            )}
+            {(user.role === "admin" || canAccessRoute("blogs", "create")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/blog/addblog">Add Blogs</Link>
+              </Button>
+            )}
           </CollapsibleContent>
         )}
       </Collapsible>
     )
-  )
 
-  const renderOffersMenu = () => (
-    canAccessRoute('offers') && (
+  const renderOffersMenu = () =>
+    canAccessRoute("offers") && (
       <Collapsible open={expandedMenu === "offers"} onOpenChange={() => toggleMenu("offers")} className="mb-1">
         <CollapsibleTrigger asChild>
           <Button
@@ -311,21 +368,24 @@ const Sidebar = () => {
         </CollapsibleTrigger>
         {sidebarOpen && (
           <CollapsibleContent className="pl-7 py-1">
-            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
-              <Link to="/admin/offer/alloffers">All Offers</Link>
-            </Button>
-            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
-              <Link to="#">Add New Offers</Link>
-            </Button>
+            {(user.role === "admin" || canAccessRoute("offers", "view")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/offer/alloffers">All Offers</Link>
+              </Button>
+            )}
+            {(user.role === "admin" || canAccessRoute("offers", "create")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="#">Add New Offers</Link>
+              </Button>
+            )}
           </CollapsibleContent>
         )}
       </Collapsible>
     )
-  )
 
   const renderEnquiryMenu = () => {
-    const showEnquiryMenu = canAccessRoute('enquiry');
-    
+    const showEnquiryMenu = canAccessRoute("enquiry")
+
     return showEnquiryMenu ? (
       <Collapsible open={expandedMenu === "enquiry"} onOpenChange={() => toggleMenu("enquiry")} className="mb-1">
         <CollapsibleTrigger asChild>
@@ -346,17 +406,17 @@ const Sidebar = () => {
         </CollapsibleTrigger>
         {sidebarOpen && (
           <CollapsibleContent className="pl-7 py-1">
-            {canAccessRoute('enquiry', 'tour') && (
+            {canAccessRoute("enquiry", "tour") && (
               <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
                 <Link to="#">Tour Enquiry</Link>
               </Button>
             )}
-            {canAccessRoute('enquiry', 'hotel') && (
+            {canAccessRoute("enquiry", "hotel") && (
               <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
                 <Link to="#">Hotel Enquiry</Link>
               </Button>
             )}
-            {canAccessRoute('enquiry', 'cab') && (
+            {canAccessRoute("enquiry", "cab") && (
               <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
                 <Link to="#">Cab Enquiry</Link>
               </Button>
@@ -364,11 +424,11 @@ const Sidebar = () => {
           </CollapsibleContent>
         )}
       </Collapsible>
-    ) : null;
+    ) : null
   }
 
-  const renderAnalyticsMenu = () => (
-    canAccessRoute('analytics') && (
+  const renderAnalyticsMenu = () =>
+    canAccessRoute("analytics") && (
       <Button
         variant="ghost"
         className={`flex justify-start items-center w-full mb-1 text-white ${!sidebarOpen && "justify-center px-2"} hover:bg-gray-700`}
@@ -380,10 +440,9 @@ const Sidebar = () => {
         </Link>
       </Button>
     )
-  )
 
-  const renderChartMenu = () => (
-    canAccessRoute('chart') && (
+  const renderChartMenu = () =>
+    canAccessRoute("chart") && (
       <Button
         variant="ghost"
         className={`flex justify-start items-center w-full mb-1 text-white ${!sidebarOpen && "justify-center px-2"} hover:bg-gray-700`}
@@ -395,7 +454,6 @@ const Sidebar = () => {
         </Link>
       </Button>
     )
-  )
 
   const renderUserMenus = () => {
     return (
@@ -416,13 +474,17 @@ const Sidebar = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post(`${backendUrl}/api/users/logout`, {}, {
-        withCredentials: true
-      });
+      await axios.post(
+        `${backendUrl}/api/users/logout`,
+        {},
+        {
+          withCredentials: true,
+        },
+      )
       // Redirect to login page or reset user state
-      setUser(null);
+      setUser(null)
     } catch (error) {
-      console.error("Logout failed", error);
+      console.error("Logout failed", error)
     }
   }
 
@@ -451,37 +513,39 @@ const Sidebar = () => {
 
         {/* Navigation area */}
         <ScrollArea className="h-[calc(100vh-4rem)]">
-          <div className="p-2">
-            {renderUserMenus()}
-          </div>
+          <div className="p-2">{renderUserMenus()}</div>
         </ScrollArea>
 
         {/* User profile section */}
         <div className="absolute bottom-0 w-full border-t border-gray-700 p-4">
           <div className="flex items-center">
             <Avatar className="h-10 w-10">
-              <AvatarImage 
-                src={user.profileImage || "https://images.unsplash.com/photo-1566004100631-35d015d6a491?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8YmFieXxlbnwwfHwwfHx8MA%3D%3D"} 
+              <AvatarImage
+                src={
+                  user.profileImage ||
+                  "https://images.unsplash.com/photo-1566004100631-35d015d6a491?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8YmFieXxlbnwwfHwwfHx8MA%3D%3D"
+                }
               />
-              <AvatarFallback>{user.firstName[0]}{user.lastName[0]}</AvatarFallback>
+              <AvatarFallback>
+                {user.firstName[0]}
+                {user.lastName[0]}
+              </AvatarFallback>
             </Avatar>
             {sidebarOpen && (
               <div className="ml-3">
-                <p className="text-sm font-medium text-white">{user.firstName} {user.lastName}</p>
+                <p className="text-sm font-medium text-white">
+                  {user.firstName} {user.lastName}
+                </p>
                 <p className="text-xs text-gray-400">
-                  {user.role.split('_').map(word => 
-                    word.charAt(0).toUpperCase() + word.slice(1)
-                  ).join(' ')}
+                  {user.role
+                    .split("_")
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
                 </p>
               </div>
             )}
             {sidebarOpen && (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="ml-auto"
-                onClick={handleLogout}
-              >
+              <Button variant="ghost" size="icon" className="ml-auto" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 text-white" />
               </Button>
             )}
@@ -509,3 +573,4 @@ const Sidebar = () => {
 }
 
 export default Sidebar
+
