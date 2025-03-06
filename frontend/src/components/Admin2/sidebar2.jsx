@@ -1,360 +1,508 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
-import { 
-  ChevronDown, 
-  Menu, 
-  Grid, 
-  Users, 
-  Luggage, 
-  Building, 
-  Car, 
-  BookOpen, 
-  Tag, 
-  MessageSquare, 
-  PieChart, 
-  LineChart, 
-  LogOut,
-  Settings
-} from "lucide-react";
+import { useState, useEffect } from "react"
+import { Link, Outlet, Navigate } from "react-router-dom"
+import axios from "axios"
+import Login from "../Login/Login"
+
+// Import shadcn components
+import { Button } from "@/components/ui/button"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { ScrollArea } from "@/components/ui/scroll-area"
+
+// Import Lucide icons
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "../ui/collapsible";
-import { Button } from "../ui/button";
-import { Separator } from "../ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
-import Login from "../Login/Login";
-import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
+  Settings,
+  Grid,
+  Users,
+  Briefcase,
+  Building,
+  Car,
+  BookOpen,
+  Tag,
+  MessageSquare,
+  PieChart,
+  LineChart,
+  LogOut,
+  Menu,
+  ChevronDown,
+} from "lucide-react"
+
+// Define route access configuration
+const ROUTE_ACCESS = {
+  super_admin: {
+    dashboard: true,
+    users: true,
+    tours: true,
+    hotels: true,
+    cabs: true,
+    blogs: true,
+    offers: true,
+    enquiry: true,
+    analytics: true,
+    chart: true
+  },
+  hotel_manager: {
+    dashboard: true,
+    hotels: true,
+    enquiry: {
+      hotel: true
+    }
+  },
+  tour_manager: {
+    dashboard: true,
+    tours: true,
+    enquiry: {
+      tour: true
+    }
+  },
+  cab_manager: {
+    dashboard: true,
+    cabs: true,
+    enquiry: {
+      cab: true
+    }
+  },
+  content_manager: {
+    dashboard: true,
+    blogs: true,
+    offers: true
+  }
+}
 
 const Sidebar = () => {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  const [user, setUser] = useState(null);
-  const [expanded, setExpanded] = useState(true);
-  const [activeItem, setActiveItem] = useState(null);
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  // Nav items with their sub-menus
-  const navItems = [
-    {
-      id: "dashboard",
-      icon: <Grid className="h-5 w-5" />,
-      title: "Dashboard",
-      href: "/admin/dashboard"
-    },
-    {
-      id: "users",
-      icon: <Users className="h-5 w-5" />,
-      title: "Users",
-      subMenu: [
-        { title: "All Users", href: "/admin/user/alluser" }
-      ]
-    },
-    {
-      id: "tours",
-      icon: <Luggage className="h-5 w-5" />,
-      title: "Tours",
-      subMenu: [
-        { title: "All Packages", href: "/admin/tour/alltour" },
-        { title: "Add New Package", href: "/admin/tour/addtour" }
-      ]
-    },
-    {
-      id: "hotels",
-      icon: <Building className="h-5 w-5" />,
-      title: "Hotels",
-      subMenu: [
-        { title: "All Hotels", href: "/admin/hotel/allhotel" },
-        { title: "Add Hotel", href: "/admin/hotel/addhotel" }
-      ]
-    },
-    {
-      id: "cabs",
-      icon: <Car className="h-5 w-5" />,
-      title: "Cabs",
-      subMenu: [
-        { title: "All Cabs", href: "/admin/cab/allcab" },
-        { title: "Add a Cab", href: "/admin/cab/addcab" }
-      ]
-    },
-    {
-      id: "blogs",
-      icon: <BookOpen className="h-5 w-5" />,
-      title: "Blogs",
-      subMenu: [
-        { title: "All Blogs", href: "/admin/blog/allblog" },
-        { title: "Add Blogs", href: "/admin/blog/addblog" }
-      ]
-    },
-    {
-      id: "offers",
-      icon: <Tag className="h-5 w-5" />,
-      title: "Offers",
-      subMenu: [
-        { title: "All Offers", href: "/admin/offer/alloffers" },
-        { title: "Add New Offers", href: "/admin/offer/addoffer" }
-      ]
-    },
-    {
-      id: "enquiry",
-      icon: <MessageSquare className="h-5 w-5" />,
-      title: "Enquiry",
-      subMenu: [
-        { title: "Package", href: "/admin/enquiry/package" },
-        { title: "Hotel", href: "/admin/enquiry/hotel" },
-        { title: "Cab", href: "/admin/enquiry/cab" }
-      ]
-    },
-    {
-      id: "analytics",
-      icon: <PieChart className="h-5 w-5" />,
-      title: "Analytics",
-      href: "/admin/analytics"
-    },
-    {
-      id: "chart",
-      icon: <LineChart className="h-5 w-5" />,
-      title: "Chart",
-      href: "/admin/chart"
-    }
-  ];
+  const backendUrl = import.meta.env.VITE_BACKEND_URL
+  const [user, setUser] = useState(null)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [expandedMenu, setExpandedMenu] = useState(null)
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserProfile = async () => {
       try {
-        const { data } = await axios.get(`${backendUrl}/api/users`, { 
-          withCredentials: true 
-        });
-        setUser(data);
+        const { data } = await axios.get(`${backendUrl}/api/users/profile`, {
+          withCredentials: true,
+        })
+        setUser(data)
+        console.log(data)
       } catch (error) {
-        console.error("User not authenticated");
-        setUser(null);
+        console.error("User not authenticated")
+        setUser(null)
       }
-    };
-
-    fetchUser();
-
-    // Set active item based on current location
-    const currentPath = location.pathname;
-    const matchingItem = navItems.find(item => 
-      item.href === currentPath || 
-      (item.subMenu && item.subMenu.some(subItem => subItem.href === currentPath))
-    );
-    
-    if (matchingItem) {
-      setActiveItem(matchingItem.id);
     }
-  }, [location.pathname]);
+
+    fetchUserProfile()
+  }, [backendUrl])
+
+  const toggleMenu = (menuName) => {
+    setExpandedMenu((prev) => (prev === menuName ? null : menuName));
+  }
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen)
+  }
+
+  // Check if a specific route/feature is accessible
+  const canAccessRoute = (route, subRoute = null) => {
+    if (!user) return false;
+    
+    const userAccess = ROUTE_ACCESS[user.role] || {};
+    if (subRoute) {
+      return userAccess[route]?.[subRoute] || false;
+    }
+    return userAccess[route] || false;
+  }
+
+  const renderDashboardMenu = () => (
+    canAccessRoute('dashboard') && (
+      <Button
+        variant="ghost"
+        className={`flex justify-start items-center w-full mb-1 text-white ${!sidebarOpen && "justify-center px-2"} hover:bg-gray-700 hover:text-white`}
+        asChild
+      >
+        <Link to="/admin/dashboard">
+          <Grid className="h-5 w-5 mr-2 text-white" />
+          {sidebarOpen && <span className="text-white">Dashboard</span>}
+        </Link>
+      </Button>
+    )
+  )
+
+  const renderUsersMenu = () => (
+    canAccessRoute('users') && (
+      <Collapsible open={expandedMenu === "users"} onOpenChange={() => toggleMenu("users")} className="mb-1">
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            className={`flex justify-between items-center w-full text-white ${!sidebarOpen && "justify-center px-2"} hover:text-white hover:bg-gray-700`}
+          >
+            <div className="flex items-center">
+              <Users className="h-5 w-5 mr-2 text-white" />
+              {sidebarOpen && <span className="text-white">Users</span>}
+            </div>
+            {sidebarOpen && (
+              <ChevronDown
+                className={`h-4 w-4 transition-transform text-white ${expandedMenu === "users" ? "rotate-180" : ""}`}
+              />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        {sidebarOpen && (
+          <CollapsibleContent className="pl-7 py-1">
+            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white " asChild>
+              <Link to="/admin/user/alluser">All Users</Link>
+            </Button>
+          </CollapsibleContent>
+        )}
+      </Collapsible>
+    )
+  )
+
+  const renderToursMenu = () => (
+    canAccessRoute('tours') && (
+      <Collapsible open={expandedMenu === "tours"} onOpenChange={() => toggleMenu("tours")} className="mb-1">
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            className={`flex justify-between items-center w-full text-white ${!sidebarOpen && "justify-center px-2"} hover:bg-gray-700`}
+          >
+            <div className="flex items-center">
+              <Briefcase className="h-5 w-5 mr-2 text-white" />
+              {sidebarOpen && <span className="text-white">Tours</span>}
+            </div>
+            {sidebarOpen && (
+              <ChevronDown
+                className={`h-4 w-4 transition-transform text-white ${expandedMenu === "tours" ? "rotate-180" : ""}`}
+              />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        {sidebarOpen && (
+          <CollapsibleContent className="pl-7 py-1">
+            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+              <Link to="/admin/tour/alltour">All Packages</Link>
+            </Button>
+            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+              <Link to="/admin/tour/addtour">Add New Package</Link>
+            </Button>
+          </CollapsibleContent>
+        )}
+      </Collapsible>
+    )
+  )
+
+  const renderHotelsMenu = () => (
+    canAccessRoute('hotels') && (
+      <Collapsible open={expandedMenu === "hotels"} onOpenChange={() => toggleMenu("hotels")} className="mb-1">
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            className={`flex justify-between items-center w-full text-white ${!sidebarOpen && "justify-center px-2"} hover:bg-gray-700`}
+          >
+            <div className="flex items-center">
+              <Building className="h-5 w-5 mr-2 text-white" />
+              {sidebarOpen && <span className="text-white">Hotels</span>}
+            </div>
+            {sidebarOpen && (
+              <ChevronDown
+                className={`h-4 w-4 transition-transform text-white ${expandedMenu === "hotels" ? "rotate-180" : ""}`}
+              />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        {sidebarOpen && (
+          <CollapsibleContent className="pl-7 py-1">
+            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+              <Link to="/admin/hotel/allhotel">All Hotels</Link>
+            </Button>
+            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+              <Link to="/admin/hotel/addhotel">Add Hotel</Link>
+            </Button>
+          </CollapsibleContent>
+        )}
+      </Collapsible>
+    )
+  )
+
+  const renderCabsMenu = () => (
+    canAccessRoute('cabs') && (
+      <Collapsible open={expandedMenu === "cabs"} onOpenChange={() => toggleMenu("cabs")} className="mb-1">
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            className={`flex justify-between items-center w-full text-white ${!sidebarOpen && "justify-center px-2"} hover:bg-gray-700`}
+          >
+            <div className="flex items-center">
+              <Car className="h-5 w-5 mr-2 text-white" />
+              {sidebarOpen && <span className="text-white">Cabs</span>}
+            </div>
+            {sidebarOpen && (
+              <ChevronDown
+                className={`h-4 w-4 transition-transform text-white ${expandedMenu === "cabs" ? "rotate-180" : ""}`}
+              />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        {sidebarOpen && (
+          <CollapsibleContent className="pl-7 py-1">
+            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+              <Link to="/admin/cab/allcab">All Cabs</Link>
+            </Button>
+            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+              <Link to="/admin/cab/addcab">Add a Cab</Link>
+            </Button>
+          </CollapsibleContent>
+        )}
+      </Collapsible>
+    )
+  )
+
+  const renderBlogsMenu = () => (
+    canAccessRoute('blogs') && (
+      <Collapsible open={expandedMenu === "blogs"} onOpenChange={() => toggleMenu("blogs")} className="mb-1">
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            className={`flex justify-between items-center w-full text-white ${!sidebarOpen && "justify-center px-2"} hover:bg-gray-700`}
+          >
+            <div className="flex items-center">
+              <BookOpen className="h-5 w-5 mr-2 text-white" />
+              {sidebarOpen && <span className="text-white">Blogs</span>}
+            </div>
+            {sidebarOpen && (
+              <ChevronDown
+                className={`h-4 w-4 transition-transform text-white ${expandedMenu === "blogs" ? "rotate-180" : ""}`}
+              />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        {sidebarOpen && (
+          <CollapsibleContent className="pl-7 py-1">
+            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+              <Link to="/admin/blog/allblog">All Blogs</Link>
+            </Button>
+            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+              <Link to="/admin/blog/addblog">Add Blogs</Link>
+            </Button>
+          </CollapsibleContent>
+        )}
+      </Collapsible>
+    )
+  )
+
+  const renderOffersMenu = () => (
+    canAccessRoute('offers') && (
+      <Collapsible open={expandedMenu === "offers"} onOpenChange={() => toggleMenu("offers")} className="mb-1">
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            className={`flex justify-between items-center w-full text-white ${!sidebarOpen && "justify-center px-2"} hover:bg-gray-700`}
+          >
+            <div className="flex items-center">
+              <Tag className="h-5 w-5 mr-2 text-white" />
+              {sidebarOpen && <span className="text-white">Offers</span>}
+            </div>
+            {sidebarOpen && (
+              <ChevronDown
+                className={`h-4 w-4 transition-transform text-white ${expandedMenu === "offers" ? "rotate-180" : ""}`}
+              />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        {sidebarOpen && (
+          <CollapsibleContent className="pl-7 py-1">
+            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+              <Link to="/admin/offer/alloffers">All Offers</Link>
+            </Button>
+            <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+              <Link to="#">Add New Offers</Link>
+            </Button>
+          </CollapsibleContent>
+        )}
+      </Collapsible>
+    )
+  )
+
+  const renderEnquiryMenu = () => {
+    const showEnquiryMenu = canAccessRoute('enquiry');
+    
+    return showEnquiryMenu ? (
+      <Collapsible open={expandedMenu === "enquiry"} onOpenChange={() => toggleMenu("enquiry")} className="mb-1">
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            className={`flex justify-between items-center w-full text-white ${!sidebarOpen && "justify-center px-2"} hover:bg-gray-700`}
+          >
+            <div className="flex items-center">
+              <MessageSquare className="h-5 w-5 mr-2 text-white" />
+              {sidebarOpen && <span className="text-white">Enquiry</span>}
+            </div>
+            {sidebarOpen && (
+              <ChevronDown
+                className={`h-4 w-4 transition-transform text-white ${expandedMenu === "enquiry" ? "rotate-180" : ""}`}
+              />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        {sidebarOpen && (
+          <CollapsibleContent className="pl-7 py-1">
+            {canAccessRoute('enquiry', 'tour') && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="#">Tour Enquiry</Link>
+              </Button>
+            )}
+            {canAccessRoute('enquiry', 'hotel') && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="#">Hotel Enquiry</Link>
+              </Button>
+            )}
+            {canAccessRoute('enquiry', 'cab') && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="#">Cab Enquiry</Link>
+              </Button>
+            )}
+          </CollapsibleContent>
+        )}
+      </Collapsible>
+    ) : null;
+  }
+  const renderAnalyticsMenu = () => (
+    canAccessRoute('analytics') && (
+      <Button
+        variant="ghost"
+        className={`flex justify-start items-center w-full mb-1 text-white ${!sidebarOpen && "justify-center px-2"} hover:bg-gray-700`}
+        asChild
+      >
+        <Link to="#">
+          <PieChart className="h-5 w-5 mr-2 text-white" />
+          {sidebarOpen && <span className="text-white">Analytics</span>}
+        </Link>
+      </Button>
+    )
+  )
+
+  const renderChartMenu = () => (
+    canAccessRoute('chart') && (
+      <Button
+        variant="ghost"
+        className={`flex justify-start items-center w-full mb-1 text-white ${!sidebarOpen && "justify-center px-2"} hover:bg-gray-700`}
+        asChild
+      >
+        <Link to="#">
+          <LineChart className="h-5 w-5 mr-2 text-white" />
+          {sidebarOpen && <span className="text-white">Chart</span>}
+        </Link>
+      </Button>
+    )
+  )
+
+  const renderUserMenus = () => {
+    return (
+      <>
+        {renderDashboardMenu()}
+        {renderUsersMenu()}
+        {renderToursMenu()}
+        {renderHotelsMenu()}
+        {renderCabsMenu()}
+        {renderBlogsMenu()}
+        {renderOffersMenu()}
+        {renderEnquiryMenu()}
+        {renderAnalyticsMenu()}
+        {renderChartMenu()}
+      </>
+    )
+  }
 
   const handleLogout = async () => {
     try {
-      await axios.post(`${backendUrl}/api/logout`, {}, { withCredentials: true });
+      await axios.post(`${backendUrl}/api/users/logout`, {}, {
+        withCredentials: true
+      });
+      // Redirect to login page or reset user state
       setUser(null);
-      navigate("/login");
     } catch (error) {
       console.error("Logout failed", error);
     }
-  };
+  }
 
   if (!user) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center">
-        <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-lg">
-          <h2 className="text-2xl font-bold text-center text-gray-800">
-            Not authorized as admin
-          </h2>
+      <div className="flex min-h-screen items-center justify-center bg-gray-900">
+        <div className="w-full max-w-md p-6 bg-gray-800 rounded-lg shadow-md">
+          <h2 className="text-2xl font-bold text-center mb-6 text-white">Not authorized</h2>
           <Login />
         </div>
       </div>
-    );
+    )
   }
 
-  const SidebarContent = () => (
-    <div className={cn(
-      "flex h-screen flex-col bg-white border-r",
-      expanded ? "w-64" : "w-20",
-      "transition-all duration-300 ease-in-out"
-    )}>
-      <div className="flex h-16 items-center px-4 border-b">
-        <div className={cn(
-          "flex items-center gap-2",
-          expanded ? "justify-between w-full" : "justify-center"
-        )}>
-          <div className="flex items-center gap-2">
-            <Settings className="h-6 w-6 text-indigo-600" />
-            {expanded && <span className="font-semibold text-lg">Admin Panel</span>}
-          </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setExpanded(!expanded)}
-            className="h-8 w-8"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
+  return (
+    <div className="flex h-screen overflow-hidden bg-gray-900">
+      {/* Sidebar */}
+      <div
+        className={`relative transition-all duration-300 ${sidebarOpen ? "w-64" : "w-20"} bg-gray-800 border-r border-gray-700 flex-shrink-0`}
+      >
+        {/* Logo area */}
+        <div className="flex items-center p-4 border-b border-gray-700 h-16">
+          <Settings className="h-6 w-6 text-indigo-400" />
+          {sidebarOpen && <span className="ml-2 font-semibold text-white">Admin Panel</span>}
         </div>
-      </div>
 
-      <div className="flex-1 overflow-auto py-2">
-        <nav className="flex flex-col gap-1 px-2">
-          {navItems.map((item) => (
-            <div key={item.id}>
-              {item.subMenu ? (
-                <Collapsible 
-                  open={activeItem === item.id} 
-                  onOpenChange={() => setActiveItem(activeItem === item.id ? null : item.id)}
-                >
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <CollapsibleTrigger asChild>
-                          <Button
-                            variant={activeItem === item.id ? "secondary" : "ghost"}
-                            className={cn(
-                              "w-full justify-between",
-                              !expanded && "px-2"
-                            )}
-                          >
-                            <div className="flex items-center gap-3">
-                              {item.icon}
-                              {expanded && <span>{item.title}</span>}
-                            </div>
-                            {expanded && <ChevronDown className={cn(
-                              "h-4 w-4 transition-transform",
-                              activeItem === item.id && "rotate-180"
-                            )} />}
-                          </Button>
-                        </CollapsibleTrigger>
-                      </TooltipTrigger>
-                      {!expanded && (
-                        <TooltipContent side="right">
-                          {item.title}
-                        </TooltipContent>
-                      )}
-                    </Tooltip>
-                  </TooltipProvider>
-                  
-                  <CollapsibleContent className="pl-10 space-y-1 mt-1">
-                    {expanded && item.subMenu.map((subItem, idx) => (
-                      <Link to={subItem.href} key={idx}>
-                        <Button 
-                          variant="ghost" 
-                          className="w-full justify-start text-sm font-normal"
-                        >
-                          {subItem.title}
-                        </Button>
-                      </Link>
-                    ))}
-                  </CollapsibleContent>
-                </Collapsible>
-              ) : (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Link to={item.href}>
-                        <Button
-                          variant={location.pathname === item.href ? "secondary" : "ghost"}
-                          className={cn(
-                            "w-full justify-start",
-                            !expanded && "px-2 justify-center"
-                          )}
-                        >
-                          {item.icon}
-                          {expanded && <span className="ml-3">{item.title}</span>}
-                        </Button>
-                      </Link>
-                    </TooltipTrigger>
-                    {!expanded && (
-                      <TooltipContent side="right">
-                        {item.title}
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-            </div>
-          ))}
-        </nav>
-      </div>
+        {/* Navigation area */}
+        <ScrollArea className="h-[calc(100vh-4rem)]">
+          <div className="p-2">
+            {renderUserMenus()}
+          </div>
+        </ScrollArea>
 
-      <div className="border-t p-4">
-        <div className={cn(
-          "flex items-center",
-          expanded ? "justify-between" : "justify-center",
-          "gap-2"
-        )}>
-          <div className="flex items-center gap-3">
-            <Avatar>
-              <AvatarImage src="https://images.unsplash.com/photo-1566004100631-35d015d6a491?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8YmFieXxlbnwwfHwwfHx8MA%3D%3D" />
-              <AvatarFallback>JD</AvatarFallback>
+        {/* User profile section */}
+        <div className="absolute bottom-0 w-full border-t border-gray-700 p-4">
+          <div className="flex items-center">
+            <Avatar className="h-10 w-10">
+              <AvatarImage 
+                src={user.profileImage || "https://images.unsplash.com/photo-1566004100631-35d015d6a491?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8YmFieXxlbnwwfHwwfHx8MA%3D%3D"} 
+              />
+              <AvatarFallback>{user.firstName[0]}{user.lastName[0]}</AvatarFallback>
             </Avatar>
-            {expanded && (
-              <div className="flex flex-col">
-                <span className="font-medium text-sm">John</span>
-                <span className="text-xs text-gray-500">Admin</span>
+            {sidebarOpen && (
+              <div className="ml-3">
+                <p className="text-sm font-medium text-white">{user.firstName} {user.lastName}</p>
+                <p className="text-xs text-gray-400">
+                  {user.role.split('_').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1)
+                  ).join(' ')}
+                </p>
               </div>
             )}
+            {sidebarOpen && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="ml-auto"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4 text-white" />
+              </Button>
+            )}
           </div>
-          {expanded && (
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-5 w-5" />
-            </Button>
-          )}
         </div>
       </div>
-    </div>
-  );
 
-  return (
-    <div className="flex h-screen">
-      {/* Desktop sidebar */}
-      <div className="hidden md:block">
-        <SidebarContent />
-      </div>
-
-      {/* Mobile sidebar */}
-      <Sheet>
-        <SheetTrigger asChild className="md:hidden">
-          <Button variant="outline" size="icon" className="fixed top-4 left-4 z-40">
-            <Menu className="h-5 w-5" />
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden bg-gray-900">
+        {/* Header with toggle button */}
+        <div className="h-16 border-b border-gray-700 flex items-center px-4 flex-shrink-0 bg-gray-800">
+          <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+            <Menu className="h-5 w-5 text-white" />
           </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="p-0">
-          <SidebarContent />
-        </SheetContent>
-      </Sheet>
+          <span className="ml-4 font-medium text-white">Hello, {user.firstName}!</span>
+        </div>
 
-      {/* Main content */}
-      <div className="flex-1 overflow-auto">
-        <div className="p-4 md:p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold">Hello, Admin</h1>
-          </div>
-          
-          {/* Your page content will be rendered here */}
-          <div className="bg-gray-50 p-6 rounded-lg border">
-            {/* Content placeholder */}
-            <div className="text-center py-20 text-gray-500">
-              Select an option from the sidebar to manage your content
-            </div>
-          </div>
+        {/* Page content */}
+        <div className="flex-1 overflow-auto p-4 bg-gray-200">
+          <Outlet />
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sideba

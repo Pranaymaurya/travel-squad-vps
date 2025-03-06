@@ -21,6 +21,7 @@ import AllCab from "./Admin/Cab/AllCab"
 import Dashboard from "./Admin/Dashboard"
 import Hotelview from "./Hotel/Hotelview"
 import AddCab from "./Admin/Cab/AddCab"
+import HotelManager from "./Admin/Hotel/gethotel"
 
 export default function AdminRoutes() {
   return (
@@ -48,6 +49,8 @@ export default function AdminRoutes() {
         <Route path="hotel/addhotel" element={<AddHotel />} />
         <Route path="hotel/edit/:hotelId" element={<EditHotel />} />
         <Route path="hotel/bookings" element={<BookingDashboard />} />
+        <Route path="hotel/user" element={<HotelManager />} />
+        <Route path="hotel/userview" element={<Hotelview />} />
 
         {/* Cab routes */}
         <Route path="cab/allcab" element={<AllCab />} />
