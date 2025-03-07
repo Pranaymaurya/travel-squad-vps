@@ -103,7 +103,7 @@ const Navbar = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </button>
-                
+
                 {/* Dropdown Menu */}
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
@@ -119,7 +119,7 @@ const Navbar = () => {
                     >
                       <i className="bx bxs-calendar mr-2"></i>My Bookings
                     </button>
-                    {user?.role === "admin" && (
+                    {["admin", "cab", "hotel"].includes(user?.role) && (
                       <>
                         <hr className="my-1" />
                         <Link to="/admin">
@@ -131,6 +131,8 @@ const Navbar = () => {
                         </Link>
                       </>
                     )}
+
+
                     <hr className="my-1" />
                     <button
                       onClick={handleLogout}

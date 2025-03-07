@@ -22,6 +22,9 @@ import Dashboard from "./Admin/Dashboard"
 import Hotelview from "./Hotel/Hotelview"
 import AddCab from "./Admin/Cab/AddCab"
 import HotelManager from "./Admin/Hotel/gethotel"
+import GetCab from "./Admin/Cab/getcab"
+import ViewCab from "./Admin/Cab/CabView"
+import HotelViews from "./Admin/Hotel/HotelInfo"
 
 export default function AdminRoutes() {
   return (
@@ -50,13 +53,14 @@ export default function AdminRoutes() {
         <Route path="hotel/edit/:hotelId" element={<EditHotel />} />
         <Route path="hotel/bookings" element={<BookingDashboard />} />
         <Route path="hotel/user" element={<HotelManager />} />
-        <Route path="hotel/userview" element={<Hotelview />} />
+        <Route path="hotel/userview" element={<HotelViews />} />
 
         {/* Cab routes */}
         <Route path="cab/allcab" element={<AllCab />} />
         <Route path="cab/addcab" element={<AddCab />} />
         <Route path="cab/edit/:cabId" element={<EditCab />} />
-
+        <Route path="cab/user" element={<GetCab/>} />
+        <Route path="cab/user/view" element={<ViewCab/>} />
         {/* Blog routes */}
         <Route path="blog/allblog" element={<AllBlog />} />
         <Route path="blog/addblog" element={<AddBlog />} />
