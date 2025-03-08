@@ -35,8 +35,14 @@ const ROUTE_ACCESS = {
     dashboard: true,
     users: true,
     tours: true,
-    hotels: true,
-    cabs: true,
+    hotels: {
+      view: false,
+      update: false,
+    },
+    cabs: {
+      view: false,
+      update: false,
+    },
     blogs: true,
     offers: true,
     enquiry: {
@@ -250,7 +256,7 @@ const Sidebar = () => {
         </CollapsibleTrigger>
         {sidebarOpen && (
           <CollapsibleContent className="pl-7 py-1">
-            {(user.role === "admin" || canAccessRoute("view")) && (
+            {(user.role === "admin") && (
               <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
                 <Link to="/admin/hotel/allhotel">All Hotels</Link>
               </Button>
@@ -296,14 +302,24 @@ const Sidebar = () => {
         </CollapsibleTrigger>
         {sidebarOpen && (
           <CollapsibleContent className="pl-7 py-1">
-            {(user.role === "admin" || canAccessRoute("cabs", "view")) && (
+            {(user.role === "admin" || canAccessRoute( "view")) && (
               <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
                 <Link to="/admin/cab/allcab">All Cabs</Link>
               </Button>
             )}
-            {(user.role === "admin" || canAccessRoute("cabs", "update")) && (
+            {(user.role === "admin" || canAccessRoute("update")) && (
               <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
                 <Link to="/admin/cab/addcab">Add a Cab</Link>
+              </Button>
+            )}
+            {(user.role === "cab" || canAccessRoute("cabs", "view")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/cab/user/view">View Cab</Link>
+              </Button>
+            )}
+            {(user.role === "cab" || canAccessRoute("cabs", "view")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/cab/user">Edit Cab</Link>
               </Button>
             )}
           </CollapsibleContent>

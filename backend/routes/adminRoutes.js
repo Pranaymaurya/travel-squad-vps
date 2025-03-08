@@ -72,7 +72,7 @@ router.route("/cab/allcab/:id")
   .get(protect, admin, getCabsById)
   .delete(protect, admin, deleteCab);
   router.route("/cab/edit/:id").get(protect, admin, getCabsById)
-  .put(protect, admin, updateCab)
+  .put(protect, updateCab)
   router.route("/cab").post(protect, admin, createCab)
 
 

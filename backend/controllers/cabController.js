@@ -16,6 +16,27 @@ const getCabs = asyncHandler(async (req, res) => {
       throw new Error("Cab not found");
     }
   });
+  
+
+const getCabsByUserId = asyncHandler(async (req, res) => {
+  try {
+    const cab = await Cab.findOne({ user: req.params.id });
+    console.log(cab);
+
+    if (cab) {
+      return res.status(200).json(cab);  // Sending a 200 status code explicitly
+    } else {
+      res.status(404);  // Set the status code
+      throw new Error("Cab not found");
+    }
+  } catch (error) {
+    // Handling errors
+    res.status(500).json({
+      message: error.message || "Server error",
+    });
+  }
+});
+
 
   const deleteCab = asyncHandler(async (req, res) => {
     const cab = await Cab.findById(req.params.id);
@@ -161,4 +182,4 @@ const getCabs = asyncHandler(async (req, res) => {
   
   
   
-export {getCabs, getCabsById, deleteCab, updateCab, createCab}; 
+export {getCabs, getCabsById, deleteCab, updateCab, createCab,getCabsByUserId}; 
