@@ -4,7 +4,8 @@ import data from "./ReviewData";// assuming the JSON file is in the same directo
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useLocation } from 'react-router-dom';
- 
+import BookingConfirmationModal from "./BookingConformational";
+import PreBookingConfirmationDialog from "./confirmdailog";
 
 const ReviewBooking = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -60,7 +61,10 @@ const ReviewBooking = () => {
   const [couponCode, setCouponCode] = useState("");
   const [amount, setAmount] = useState(data[0].paymentAmount); // using the amount from JSON
   const halfAmount = amount / 2;
-  
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [bookingConfirmationDetails, setBookingConfirmationDetails] = useState({});
+  const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false);
+  const [bookingDetailsForConfirmation, setBookingDetailsForConfirmation] = useState({});
 
   const handleCheckboxChange = () => {
     setUsePickupAsBilling(!usePickupAsBilling);
@@ -91,37 +95,93 @@ const ReviewBooking = () => {
   }, [p.id]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent the default form submission
+    e.preventDefault();
 
-    const bookingData = {
-      pickupLocation:pickupAddress,
-      dropoffLocation:dropoffAddress,
-      pickupTime:pickuptime,
-      dropofftime,
-      // usePickupAsBilling,
-      // name,
-      // email,
-      // gender,
-      // contactNumber,
-      // paymentType,
-      // couponCode,
+    // Prepare booking details for confirmation
+    const confirmationDetails = {
+      cabModel: cabData.model,
+      pickupLocation: pickupAddress,
+      dropoffLocation: dropoffAddress,
+      pickupTime: pickuptime,
       totalAmount: discountedPrice
-      ,
-      cab:p.id,
-      // filters,
-      // cabData,
+    };
+
+    // Open confirmation dialog instead of directly submitting
+    setBookingDetailsForConfirmation(confirmationDetails);
+    setIsConfirmationDialogOpen(true);
+  };
+
+  const handleConfirmBooking = async () => {
+    const bookingData = {
+      pickupLocation: pickupAddress,
+      dropoffLocation: dropoffAddress,
+      pickupTime: pickuptime,
+      dropofftime,
+      totalAmount: discountedPrice,
+      cab: p.id,
     };
 
     try {
-      console.log(bookingData)
       const response = await axios.post(`${backendUrl}/api/cab/booking/create`, bookingData, { withCredentials: true });
+      setIsConfirmationDialogOpen(false);
       console.log("Booking successful:", response.data);
-      // Handle success (e.g., redirect to a confirmation page)
+      setBookingConfirmationDetails({
+        bookingId: response.data._id,
+        cabModel: cabData.model,
+        pickupLocation: pickupAddress,
+        pickupTime: pickuptime,
+        totalAmount: discountedPrice
+      });
+
+      // Open the confirmation modal
+      setIsConfirmationModalOpen(true);
     } catch (error) {
       console.error("Error sending booking data:", error);
-      // Handle error (e.g., show an error message)
+      // Handle error (e.g., show error message)
     }
   };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault(); // Prevent the default form submission
+
+  //   const bookingData = {
+  //     pickupLocation:pickupAddress,
+  //     dropoffLocation:dropoffAddress,
+  //     pickupTime:pickuptime,
+  //     dropofftime,
+  //     // usePickupAsBilling,
+  //     // name,
+  //     // email,
+  //     // gender,
+  //     // contactNumber,
+  //     // paymentType,
+  //     // couponCode,
+  //     totalAmount: discountedPrice
+  //     ,
+  //     cab:p.id,
+  //     // filters,
+  //     // cabData,
+  //   };
+
+  //   try {
+  //     console.log(bookingData)
+  //     const response = await axios.post(`${backendUrl}/api/cab/booking/create`, bookingData, { withCredentials: true });
+  //     console.log("Booking successful:", response.data);
+  //     setBookingConfirmationDetails({
+  //       bookingId: response.data._id,
+  //       cabModel: cabData.model,
+  //       pickupLocation: pickupAddress,
+  //       pickupTime: pickuptime,
+  //       totalAmount: discountedPrice
+  //     });
+
+  //     // Open the confirmation modal
+  //     setIsConfirmationModalOpen(true);
+  //     // Handle success (e.g., redirect to a confirmation page)
+  //   } catch (error) {
+  //     console.error("Error sending booking data:", error);
+  //     // Handle error (e.g., show an error message)
+  //   }
+  // };
 
   
 
@@ -280,49 +340,6 @@ const ReviewBooking = () => {
                   Use pickup location as billing address
                 </label>
               </div>
-              {/* <h4 className="text-lg font-semibold mb-4">
-                Confirm Traveller Information
-              </h4>
-              <div className="mb-4">
-                <label className="block mb-2">Name</label>
-                <input
-                  type="text"
-                  className="w-full p-2 border border-gray-300 rounded"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">Email ID</label>
-                <input
-                  type="email"
-                  className="w-full p-2 border border-gray-300 rounded"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">Gender</label>
-                <select
-                  className="w-full p-2 border border-gray-300 rounded"
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                >
-                  <option value="">Select Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2">Contact Number</label>
-                <input
-                  type="tel"
-                  className="w-full p-2 border border-gray-300 rounded"
-                  value={contactNumber}
-                  onChange={(e) => setContactNumber(e.target.value)}
-                />
-              </div> */}
               <div className="mb-4">
                 <button type="submit" className="text-lg font-semibold bg-sky-950 hover:bg-sky-700 text-white rounded p-3 w-full">
                   Amount: ₹ {discountedPrice}
@@ -449,6 +466,17 @@ const ReviewBooking = () => {
                 Free cancellation till 24 hours of departure
               </div>
             </div>
+            <BookingConfirmationModal 
+        isOpen={isConfirmationModalOpen}
+        onClose={() => setIsConfirmationModalOpen(false)}
+        bookingDetails={bookingConfirmationDetails}
+      />
+      <PreBookingConfirmationDialog 
+        isOpen={isConfirmationDialogOpen}
+        onClose={() => setIsConfirmationDialogOpen(false)}
+        onConfirm={handleConfirmBooking}
+        bookingDetails={bookingDetailsForConfirmation}
+      />
           </div>
         </div>
       </div>

@@ -39,6 +39,16 @@ const admin = (req, res, next) => {
     throw new Error("Not authorized as an admin");
   }
 };
+const authorize = (roles = []) => {
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      res.status(401);
+      throw new Error("Not authorized for this role");
+    }
+    next();
+  };
+}
+
 
 const AccessRole=(roles)=>{
   return (req,res,next) =>{

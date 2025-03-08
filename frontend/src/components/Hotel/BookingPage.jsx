@@ -2,8 +2,15 @@
 
 import { useState, useEffect } from "react"
 import axios from "axios"
-import { useParams } from "react-router-dom"
-import { useLocation } from "react-router-dom"
+import { useParams, useLocation } from "react-router-dom"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,20 +20,124 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { MapPin, Star, Calendar, Users, Info, CreditCard, Gift, Shield } from "lucide-react"
+import { MapPin, Star, Calendar, Users, Info, CreditCard, Gift, Shield, AlertTriangle, CheckCircle } from "lucide-react"
 
+// Pre-booking confirmation dialog component
+const PreBookingConfirmationDialog = ({ isOpen, onClose, onConfirm, bookingDetails }) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <div className="flex justify-center mb-4">
+            <AlertTriangle className="text-yellow-500 w-16 h-16" />
+          </div>
+          <DialogTitle className="text-2xl text-center">Confirm Your Booking</DialogTitle>
+          <DialogDescription className="text-center">Please review the details before proceeding</DialogDescription>
+        </DialogHeader>
+
+        <div className="bg-gray-100 rounded-lg p-4 space-y-3">
+          <div className="flex justify-between">
+            <span className="font-medium">Hotel:</span>
+            <span>{bookingDetails.hotelName}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Room Count:</span>
+            <span>{bookingDetails.roomCount}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Check-in:</span>
+            <span>{bookingDetails.checkin}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Check-out:</span>
+            <span>{bookingDetails.checkout}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Total Amount:</span>
+            <span className="font-bold">₹ {bookingDetails.amount}</span>
+          </div>
+        </div>
+
+        <DialogFooter className="flex space-x-4 mt-4">
+          <Button variant="outline" onClick={onClose} className="w-full">
+            Cancel
+          </Button>
+          <Button onClick={onConfirm} className="w-full bg-sky-950 hover:bg-sky-700">
+            Confirm Booking
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// Booking confirmation modal component
+const BookingConfirmationModal = ({ isOpen, onClose, bookingDetails }) => {
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <div className="flex justify-center mb-4">
+            <CheckCircle className="text-green-500 w-16 h-16" />
+          </div>
+          <DialogTitle className="text-2xl text-center">Booking Successful</DialogTitle>
+        </DialogHeader>
+
+        <div className="bg-gray-100 rounded-lg p-4 space-y-3">
+          <div className="flex justify-between">
+            <span className="font-medium">Booking ID:</span>
+            <span>{bookingDetails._id}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Hotel:</span>
+            <span>{bookingDetails.hotelName}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Rooms:</span>
+            <span>{bookingDetails.roomCount}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Total Amount:</span>
+            <span className="font-bold">₹ {bookingDetails.amount}</span>
+          </div>
+        </div>
+
+        <DialogFooter className="mt-4">
+          <Button onClick={onClose} className="w-full bg-sky-950 hover:bg-sky-700">
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// Main BookingPage component
 const BookingPage = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL
+  const [roomCount, setRoomCount] = useState(1)
+  const [isPreBookingDialogOpen, setIsPreBookingDialogOpen] = useState(false)
+  const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] = useState(false)
+  const [bookingDetails, setBookingDetails] = useState({})
+  const [hotelData, setHotelData] = useState({
+    name: "Luxury Hotel & Resort",
+    location: "City Center, Metro Area",
+    category: "5-Star Hotel",
+    images: [],
+    price: 12500,
+    taxes: 2500,
+    inclusions: [],
+    hotelDetails: {},
+    rating: 4.8,
+  })
 
   const locationHook = useLocation()
   const initialFilters = locationHook.state || {
-    checkin: "",
-    checkout: "",
-    guests: "",
+    checkin: "2023-06-15",
+    checkout: "2023-06-17",
+    guests: "2",
   }
-
   const [filters, setFilters] = useState(initialFilters)
-  const [hotelData, setHotelData] = useState({})
   const p = useParams()
 
   useEffect(() => {
@@ -38,26 +149,55 @@ const BookingPage = () => {
         console.error("Error fetching hotel data:", error)
       }
     }
-    fetchHotelData()
-  }, [p.id])
 
-  const {
-    name = "Luxury Hotel & Resort",
-    location = "City Center, Metro Area",
-    distance,
-    hotelPriceHighlight,
-    category = "5-Star Hotel",
-    images = [],
-    price = 12500,
-    taxes = 2500,
-    inclusions = [],
-    hotelDetails = {},
-    foodAndDining,
-    locationAndSurroundings,
-    roomDetailsAndAmenities,
-    activitiesAndNearbyAttractions,
-    rating = 4.8,
-  } = hotelData
+    if (p.id) {
+      fetchHotelData()
+    }
+  }, [p.id]) // Removed backendUrl from dependencies
+
+  const handleBookingSubmit = async () => {
+    try {
+      // Prepare booking data matching backend requirements
+      const bookingData = {
+        hotel: hotelData._id, // Assuming hotelData contains the hotel ID
+        roomCount: roomCount,
+      }
+
+      // Send booking request
+      const response = await axios.post(`${backendUrl}/api/booking/create`, bookingData, { withCredentials: true })
+
+      // Close pre-booking dialog
+      setIsPreBookingDialogOpen(false)
+
+      // Prepare booking confirmation details
+      const confirmationDetails = {
+        ...response.data.message, // Backend returns the booking object
+        hotelName: hotelData.name,
+        amount: response.data.message.ammount, // Note: matching backend's spelling
+      }
+
+      // Open booking confirmation modal
+      setBookingDetails(confirmationDetails)
+      setIsBookingConfirmationOpen(true)
+    } catch (error) {
+      console.error("Booking error:", error)
+      // Handle error (show error message, etc.)
+    }
+  }
+
+  const openPreBookingConfirmation = () => {
+    // Prepare pre-booking details
+    const preBookingDetails = {
+      hotelName: hotelData.name,
+      roomCount: roomCount,
+      checkin: filters.checkin,
+      checkout: filters.checkout,
+      amount: roomCount * hotelData.price,
+    }
+
+    setBookingDetails(preBookingDetails)
+    setIsPreBookingDialogOpen(true)
+  }
 
   const states = [
     "Andhra Pradesh",
@@ -103,19 +243,19 @@ const BookingPage = () => {
             <CardHeader className="pb-2">
               <div className="flex justify-between items-start">
                 <div>
-                  <CardTitle className="text-2xl">{name}</CardTitle>
+                  <CardTitle className="text-2xl">{hotelData.name}</CardTitle>
                   <div className="flex items-center text-muted-foreground mt-1">
                     <MapPin className="h-4 w-4 mr-1" />
-                    <span>{location}</span>
+                    <span>{hotelData.location}</span>
                   </div>
                 </div>
                 <div className="text-right">
                   <Badge variant="outline" className="bg-primary/10 text-primary mb-1">
-                    {category}
+                    {hotelData.category}
                   </Badge>
                   <div className="flex items-center mt-1">
                     <Star className="h-4 w-4 text-yellow-500 mr-1 fill-yellow-500" />
-                    <span className="font-medium">{rating}</span>
+                    <span className="font-medium">{hotelData.rating}</span>
                   </div>
                 </div>
               </div>
@@ -126,16 +266,18 @@ const BookingPage = () => {
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-primary" />
                     <span className="font-medium">Check-in:</span>
-                    <span className="ml-2">{filters.checkin || "2023-06-15"}</span>
+                    <span className="ml-2">{filters.checkin}</span>
                   </div>
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-primary" />
                     <span className="font-medium">Check-out:</span>
-                    <span className="ml-2">{filters.checkout || "2023-06-17"}</span>
+                    <span className="ml-2">{filters.checkout}</span>
                   </div>
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-2 text-primary" />
-                    <span>2 Nights | 2 Adults | 1 Room</span>
+                    <span>
+                      2 Nights | 2 Adults | {roomCount} Room{roomCount > 1 ? "s" : ""}
+                    </span>
                   </div>
                 </div>
                 <div className="space-y-1 text-sm">
@@ -297,12 +439,14 @@ const BookingPage = () => {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span>1 Room x 2 Nights</span>
-                    <span>₹ {price.toLocaleString()}</span>
+                    <span>
+                      {roomCount} Room{roomCount > 1 ? "s" : ""} x 2 Nights
+                    </span>
+                    <span>₹ {(roomCount * hotelData.price).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Hotel Taxes</span>
-                    <span>₹ {taxes.toLocaleString()}</span>
+                    <span>₹ {(roomCount * hotelData.taxes).toLocaleString()}</span>
                   </div>
 
                   <div className="flex items-start space-x-2 text-sm">
@@ -324,7 +468,7 @@ const BookingPage = () => {
 
                 <div className="flex justify-between font-medium">
                   <span>Total Amount</span>
-                  <span>₹ {(price + taxes).toLocaleString()}</span>
+                  <span>₹ {(roomCount * (hotelData.price + hotelData.taxes)).toLocaleString()}</span>
                 </div>
               </div>
             </CardContent>
@@ -373,12 +517,48 @@ const BookingPage = () => {
             </CardContent>
           </Card>
 
+          {/* Room Count Selection */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Number of Rooms</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between">
+                <span>Select rooms to book</span>
+                <div className="flex items-center space-x-3">
+                  <Button variant="outline" size="icon" onClick={() => setRoomCount(Math.max(1, roomCount - 1))}>
+                    -
+                  </Button>
+                  <span className="w-8 text-center">{roomCount}</span>
+                  <Button variant="outline" size="icon" onClick={() => setRoomCount(roomCount + 1)}>
+                    +
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Pay Now Button */}
-          <Button size="lg" className="w-full text-lg py-6">
-            Pay Now
+          <Button size="lg" className="w-full text-lg py-6" onClick={openPreBookingConfirmation}>
+            Pay Now (₹ {(roomCount * (hotelData.price + hotelData.taxes)).toLocaleString()})
           </Button>
         </div>
       </div>
+
+      {/* Pre-Booking Confirmation Dialog */}
+      <PreBookingConfirmationDialog
+        isOpen={isPreBookingDialogOpen}
+        onClose={() => setIsPreBookingDialogOpen(false)}
+        onConfirm={handleBookingSubmit}
+        bookingDetails={bookingDetails}
+      />
+
+      {/* Booking Confirmation Modal */}
+      <BookingConfirmationModal
+        isOpen={isBookingConfirmationOpen}
+        onClose={() => setIsBookingConfirmationOpen(false)}
+        bookingDetails={bookingDetails}
+      />
     </div>
   )
 }
