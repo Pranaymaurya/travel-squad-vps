@@ -1,11 +1,11 @@
 import {Router} from 'express';
 import { AccessRole, admin, protect } from '../middleware/authMiddleware.js';
-import { Create, GetAllBooking, GetAllBookingByHotelId, GetAllBookingById, GetBookingById, Update, UpdateStatus }  from '../controllers/BookingController.js';
+import { Create, GetAllBooking, GetAllBookingByHotelId,  GetBookingById, Update, UpdateStatus }  from '../controllers/BookingController.js';
 const BookingRouter = Router();
 
 
 BookingRouter.get('/:id',protect,GetBookingById);
-BookingRouter.get('/user/:id',protect,GetAllBookingById);
+// BookingRouter.get('/user/:id',protect,GetAllBookingById);
 BookingRouter.get('/hotel/:id',protect,GetAllBookingByHotelId);
 BookingRouter.get('/hotels',GetAllBooking);
 BookingRouter.post('/create',protect,Create);

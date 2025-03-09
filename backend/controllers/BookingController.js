@@ -78,7 +78,7 @@ export async function Update(req, res) {
     }
 }
 
-export async function GetAllBookingById(req, res) {
+export async function GetAllBookingUser(req, res) {
     try {
         const getBooking = await Booking.find({ user: req.user._id })
         res.json(getBooking)
@@ -113,3 +113,16 @@ export async function GetAllBooking(req, res) {
         res.status(500).json({ success: false, message: "Internal Server Error" })
     }
 }
+
+// export default async function GetAllBookingByHotelId(req,res){
+//     try {
+//         const {id}=req.params
+//         const bookings=await Booking.find({hotel:id})
+//         if(bookings.length>0){
+//             res.status(200).json(bookings)
+//         }
+//         else res.status(400).json({ success: false, message: "Not Found" })
+//     } catch (error) {
+//         res.status(500).json({ success: false, message: "Internal Server Error" })
+//     }
+// }
