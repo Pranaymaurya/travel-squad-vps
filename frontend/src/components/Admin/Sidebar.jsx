@@ -271,9 +271,19 @@ const Sidebar = () => {
                 <Link to="/admin/hotel/userview">Hotel View</Link>
               </Button>
             )}
+            {(user.role === "hotel" || canAccessRoute("hotels", "view")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/hotel/bookings">Hotel Bookings</Link>
+              </Button>
+            )}
             {user.role === "admin" && (
               <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
                 <Link to="/admin/hotel/addhotel">Add Hotel</Link>
+              </Button>
+            )}
+            {user.role === "admin" && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/hotel/all">Hotels Bookings</Link>
               </Button>
             )}
           </CollapsibleContent>
@@ -312,6 +322,11 @@ const Sidebar = () => {
                 <Link to="/admin/cab/addcab">Add a Cab</Link>
               </Button>
             )}
+            {(user.role === "admin" || canAccessRoute("update")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/cab/all">Cabs Booking</Link>
+              </Button>
+            )}
             {(user.role === "cab" || canAccessRoute("cabs", "view")) && (
               <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
                 <Link to="/admin/cab/user/view">View Cab</Link>
@@ -320,6 +335,11 @@ const Sidebar = () => {
             {(user.role === "cab" || canAccessRoute("cabs", "view")) && (
               <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
                 <Link to="/admin/cab/user">Edit Cab</Link>
+              </Button>
+            )}
+            {(user.role === "cab" || canAccessRoute("cabs", "view")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/cab/booking">Cab Booking</Link>
               </Button>
             )}
           </CollapsibleContent>
@@ -506,14 +526,13 @@ const Sidebar = () => {
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-900">
-        <div className="w-full max-w-md p-6 bg-gray-800 rounded-lg shadow-md">
-          <h2 className="text-2xl font-bold text-center mb-6 text-white">Not authorized</h2>
-          <Login />
-        </div>
-      </div>
-    )
+      <div className="bg-black">
+            <Login />
+            </div>
+          
+    );
   }
+  
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-900">

@@ -57,7 +57,7 @@ export async function UpdateStatus(req,res){
         const { id } = req.params; 
         const { status } = req.body; 
         // Validate the status
-        const validStatuses = ["pending", "confirmed", "completed", "canceled"];
+        const validStatuses = ["pending", "confirmed", "completed", "cancelled"];
         if (!validStatuses.includes(status)) {
             return res.status(400).json({ message: 'Invalid status value.' });
         }
@@ -123,6 +123,24 @@ export async function GetAllCabBookings(req,res){
         const getAll=await CabBooking.find()
         res.status(200).json(getAll)
     } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while getting the booking status.' });
+    }
+}
+export async function GetCabBookingsByCabId(req, res) {
+    try {
+        const id = req.params.id; // assuming cabId is passed as a URL parameter
+
+        // Fetch bookings that match the cabId
+        const getBooking = await CabBooking.find({ cab: id });
+
+        // If no bookings are found, return a specific message
+        if (getBooking.length === 0) {
+            return res.status(404).json({ success: false, message: "No bookings found for this cab" });
+        }
+
+        res.status(200).json(getBooking);
+    } catch (error) {
+        console.error(error);  // Log the error for debugging
         return res.status(500).json({ message: 'An error occurred while getting the booking status.' });
     }
 }

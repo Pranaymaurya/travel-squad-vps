@@ -31,7 +31,7 @@ const UserSection = ({ id, name, email, date, onDelete, userId, role ,handelSele
           <option value="hotel">Hotel</option>
           <option value="cab">Cab</option>
           <option value="user">User</option>
-          <option value="admin">Admin</option>
+          {/* <option value="admin">Admin</option> */}
         </select>
       </div>
     </td>

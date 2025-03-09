@@ -37,7 +37,9 @@ export async function GetBookingById(req, res) {
 export async function UpdateStatus(req, res) {
     try {
         const { id } = req.params
+        console.log(id)
         const { status } = req.body;
+        console.log(status)
         if (!status) return res.status(404).json({ success: false, message: "Status is requierd" })
         const isUpdated = await Booking.findByIdAndUpdate(id, { status })
         if (!isUpdated) return res.status(304).json({ success: false, message: "Not updated status" })
@@ -84,6 +86,24 @@ export async function GetAllBookingUser(req, res) {
         res.status(500).json({ success: false, message: "Internal Server Error" })
     }
 }
+export async function GetAllBookingByHotelId(req, res) {
+    try {
+        const id = req.params.id; // assuming hotelId is passed as a URL parameter
+
+        // Fetch bookings that match the hotelId
+        const getBooking = await Booking.find({ hotel: id });
+
+        // If no bookings are found, return a specific message
+        if (getBooking.length === 0) {
+            return res.status(404).json({ success: false, message: "No bookings found for this hotel" });
+        }
+
+        res.json(getBooking);
+    } catch (error) {
+        console.error(error);  // Log the error for debugging
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+}
 
 export async function GetAllBooking(req, res) {
     try {
@@ -94,15 +114,15 @@ export async function GetAllBooking(req, res) {
     }
 }
 
-export default async function GetAllBookingByHotelId(req,res){
-    try {
-        const {id}=req.params
-        const bookings=await Booking.find({hotel:id})
-        if(bookings.length>0){
-            res.status(200).json(bookings)
-        }
-        else res.status(400).json({ success: false, message: "Not Found" })
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Internal Server Error" })
-    }
-}
+// export default async function GetAllBookingByHotelId(req,res){
+//     try {
+//         const {id}=req.params
+//         const bookings=await Booking.find({hotel:id})
+//         if(bookings.length>0){
+//             res.status(200).json(bookings)
+//         }
+//         else res.status(400).json({ success: false, message: "Not Found" })
+//     } catch (error) {
+//         res.status(500).json({ success: false, message: "Internal Server Error" })
+//     }
+// }
