@@ -14,18 +14,19 @@ function HotelPage() {
 
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-
+  console.log(queryParams.get('guestrating'));
+  
   const initialFilters = {
     location: queryParams.get("location") || "",
     checkin: queryParams.get("checkin") || formatDate(new Date()),
     checkout: queryParams.get("checkout") || formatDate(new Date()),
     guests: queryParams.get("guests") || "",
     price: queryParams.get("price") || "",
-    minBudget: queryParams.get("minBudget") || "",
-    maxBudget: queryParams.get("maxBudget") || "",
-    starRating: queryParams.get("starRating") || "",
-    guestRating: queryParams.get("guestRating") || "",
-    propertyType: queryParams.get("propertyType") || "",
+    minBudget: queryParams.get("price").split('-')[0] || "",
+    maxBudget: queryParams.get("price").split('-')[1]  || "",
+    starRating: queryParams.get("starrating") || "",
+    guestRating: queryParams.get("guestrating") || "",
+    propertyType: queryParams.get("propertytype") || "",
     amenities: queryParams.get("amenities") ? queryParams.get("amenities").split(",") : [],
     facilities: queryParams.get("facilities") ? queryParams.get("facilities").split(",") : [],
   };
