@@ -166,11 +166,11 @@ function HotelSidebar({ filters, setFilters }) {
               className="block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               <option value="">--Select--</option>
-              <option>1 Star</option>
-              <option>2 Star</option>
-              <option>3 Star</option>
-              <option>4 Star</option>
-              <option>5 Star</option>
+              <option value='1'>1 Star</option>
+              <option value={'2'}>2 Star</option>
+              <option value={'3'}>3 Star</option>
+              <option value={4}>4 Star</option>
+              <option value={5}>5 Star</option>
             </select>
           </div>
 
@@ -183,10 +183,10 @@ function HotelSidebar({ filters, setFilters }) {
               className="block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               <option value="">--Select--</option>
-              <option>Excellent (4.5+)</option>
-              <option>Very Good (4.0+)</option>
-              <option>Good (3.5+)</option>
-              <option>Pleasant (3.0+)</option>
+              <option value={4.5}>Excellent (4.5+)</option>
+              <option value={4.1}>Very Good (4.0+)</option>
+              <option value={3.5}>Good (3.5+)</option>
+              <option value={3.1}>Pleasant (3.0+)</option>
             </select>
           </div>
 

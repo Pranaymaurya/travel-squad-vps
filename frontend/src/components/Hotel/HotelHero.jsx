@@ -39,6 +39,11 @@ const HotelHero = () => {
       checkout: formData.checkout,
       guests: formData.guests,
       price: formData.price,
+      guestrating:formData.guestRating,
+      starrating:formData.starRating,
+      propertytype:formData.propertyType,
+      amenities:formData.amenities
+
     }).toString();
     
     
@@ -48,6 +53,8 @@ const HotelHero = () => {
 
   const handleChange = (e) => {
     const { id, value } = e.target;
+    console.log(id);
+    
     setFormData((prevState) => ({
       ...prevState,
       [id]: value
@@ -148,6 +155,75 @@ const HotelHero = () => {
                 <FiChevronDown className="absolute top-3 right-2 " />
               </div>
             </div>
+
+            <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2">Star Rating</label>
+            <select
+            id="starRating"
+              name="starRating"
+              value={formData.starRating}
+              onChange={handleChange}
+              className="block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">--Select--</option>
+              <option value='1'>1 Star</option>
+              <option value={'2'}>2 Star</option>
+              <option value={'3'}>3 Star</option>
+              <option value={4}>4 Star</option>
+              <option value={5}>5 Star</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2">Guest Rating</label>
+            <select
+            id="guestRating"
+              name="guestRating"
+              value={formData.guestRating}
+              onChange={handleChange}
+              className="block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">--Select--</option>
+              <option value={4.5}>Excellent (4.5+)</option>
+              <option value={4.1}>Very Good (4.0+)</option>
+              <option value={3.5}>Good (3.5+)</option>
+              <option value={3.1}>Pleasant (3.0+)</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2">Property Type</label>
+            <select
+            id="propertyType"
+              name="propertyType"
+              value={formData.propertyType}
+              onChange={handleChange}
+              className="block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">--Select--</option>
+              <option value={'Hotel'}>Hotel</option>
+              <option value={'Apartment'}>Apartment</option>
+              <option value={'Villa'}>Villa</option>
+              <option value={'Resort'}>Resort</option>
+              <option value={'Camp'}>Camp</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2">Amenities</label>
+            <select
+            id="amenities"
+              name="amenities"
+              value={formData.amenities}
+              onChange={handleChange}
+              className="block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="">--Select--</option>
+              <option value={'Wifi'}>Wifi</option>
+              <option value={'Swimming-Pool'}>Swimming Pool</option>
+              <option value={'Spa'}>Spa</option>
+            </select>
+          </div>
           </div>
           <div className="text-center mt-[-15px]">
             <button
