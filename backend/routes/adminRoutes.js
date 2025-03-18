@@ -47,7 +47,8 @@ import{
 } from "../controllers/offerController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 import { GetAllCabBookings } from "../controllers/CabBookingController.js";
-import { GetAllBooking } from "../controllers/BookingController.js";
+import { GetAllBooking, } from "../controllers/BookingController.js";
+import { GetAllTourBooking } from "../controllers/tourBookingController.js";
 
 router.route("/blog/allblog").get(protect, admin, getBlogs);
 router.route("/blog/addBlog").post(protect, admin, createBlog);
@@ -97,8 +98,11 @@ router.route("/offer/alloffer/:id")
   // router.route("/cab/edit/:id").get(protect, admin, getCabsById)
   // .put(protect, admin, updateCab)
   // router.route("/cab").post(protect, admin, createCab)
+
+  //bookings
   router.post('/user/changerole',protect,admin,changerole)
   router.get('/cab/booking',protect,admin,GetAllCabBookings)
   router.get('/hotel/booking',protect,admin,GetAllBooking);
+  router.get('/tour/booking',protect,admin,GetAllTourBooking)
 
 export default router;
