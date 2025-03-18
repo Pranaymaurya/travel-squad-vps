@@ -3,7 +3,87 @@ import Hotel from "../models/hotelModel.js";
 import {FindAndDeleteImage,DeleteImage} from "../config/DeleteImage.js";
 
 const getHotels = asyncHandler(async (req, res) => {
-  const hotels = await Hotel.find({});
+  // console.log('h');
+  const {
+    location,
+    checkin,
+    checkout,
+    guests,
+    minBudget,
+    maxBudget,
+    starRating,
+    guestRating,
+    propertyType,
+    amenities,
+    facilities,
+  } = req.query;
+  // Build the query object
+  const query = {};
+  // Define an array to hold various conditions
+  const orConditions = [];
+  // Filter by location
+  if (location) {
+    orConditions.push({ location: { $regex: location, $options: 'i' } }); // Case-insensitive search
+  }
+  // Check-in and check-out dates logic (assumes availability field)
+  if (checkin && checkout) {
+    orConditions.push({
+      availability: {
+        $elemMatch: {
+          $or: [
+            { startDate: { $lte: new Date(checkin) }, endDate: { $gte: new Date(checkin) } },
+            { startDate: { $lte: new Date(checkout) }, endDate: { $gte: new Date(checkout) } },
+          ],
+        },
+      },
+    });
+  }
+  // Filter by number of guests
+  if (guests) {
+    orConditions.push({ guests: { $gte:Math.floor(  Number(guests)) } });
+  }
+  // Filter by price range
+  if (minBudget || maxBudget) {
+    const priceCondition = {};
+    if (minBudget) {
+      priceCondition.$gte = Number(minBudget);
+    }
+    if (maxBudget) {
+      priceCondition.$lte = Number(maxBudget);
+    }
+    orConditions.push({ price: priceCondition });
+  }
+  // Filter by star rating
+  if (starRating) {
+    orConditions.push({ rating:  { $gte:  Number(starRating)+0.1 ,$lte:Number(starRating)+0.5 } });
+  }
+  console.log(orConditions);
+  
+  // Filter by guest rating
+  if (guestRating) {
+    orConditions.push({ reviewCount: { $gte: Number(guestRating) } });
+  }
+  // Filter by property type
+  if (propertyType) {
+    orConditions.push({ type: propertyType.toLowerCase() });
+  }
+  // Filter by amenities (if any are provided)
+  if (amenities && amenities.length > 0) {
+    orConditions.push({ amenities: { $all: amenities } }); // All specified amenities must be present
+  }
+  // Filter by facilities (if any are provided)
+  if (facilities && facilities.length > 0) {
+    orConditions.push({ facilities: { $all: facilities } }); // All specified facilities must be present
+  }
+  // Combine all OR conditions into the query
+  if (orConditions.length > 1) {
+    query.$or = orConditions;
+  }
+  // Fetch filtered hotels
+  console.log('sd',query);
+  
+  const hotels = await Hotel.find(query);
+  // Return the filtered hotels
   res.json(hotels);
 });
 

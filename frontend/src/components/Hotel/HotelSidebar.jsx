@@ -23,7 +23,7 @@ function HotelSidebar({ filters, setFilters }) {
     console.log(newFilters)
     setFilters(newFilters);
   }, [location.search, setFilters]);
-  console.log(filters.maxBudget)
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFilters({
@@ -31,6 +31,7 @@ function HotelSidebar({ filters, setFilters }) {
       [name]: value,
     });
   };
+console.log(filters);
 
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
@@ -242,13 +243,13 @@ function HotelSidebar({ filters, setFilters }) {
         </div>
 
         <div className="mt-6 space-y-3">
-          <button
+          {/* <button
             type="submit"
             onClick={handleSubmit}
             className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out"
           >
             Search
-          </button>
+          </button> */}
           
           <button
             className="md:hidden w-full border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 font-bold py-2 px-4 rounded transition duration-150 ease-in-out"
@@ -270,9 +271,9 @@ function HotelSidebar({ filters, setFilters }) {
   );
 }
 
-HotelSidebar.propTypes = {
-  filters: PropTypes.object.isRequired,
-  setFilters: PropTypes.func.isRequired,
-};
+// HotelSidebar.propTypes = {
+//   filters: PropTypes.object.isRequired,
+//   setFilters: PropTypes.func.isRequired,
+// };
 
 export default HotelSidebar;
