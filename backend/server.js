@@ -17,6 +17,7 @@ import cabRoutes from "./routes/cabRoutes.js"
 import offerRoutes from "./routes/offerRoutes.js"
 import BookingRouter from "./routes/bookingRoutes.js";
 import CabBookingRouter from "./routes/CabBookingRoute.js";
+import tourBookingRouter from "./routes/tourBookingRoutes.js"
 
 connectDB();
 const app = express();
@@ -50,6 +51,7 @@ app.use("/api/cab", cabRoutes);
 app.use("/api/offer", offerRoutes);
 app.use('/api/booking',BookingRouter)
 app.use('/api/cab/booking',CabBookingRouter)
+app.use('/api/tour/booking',tourBookingRouter)
 
 const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
