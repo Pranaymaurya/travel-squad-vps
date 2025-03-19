@@ -33,7 +33,7 @@ function HotelCard({ hotel, filters }) {
             {hotel.location} | {hotel.distance}
           </p>
           <p className="text-sm mt-2">{hotel.category}</p>
-          <p className="text-sm">{hotel.star} Star Hotel</p>
+          <p className="text-sm">{hotel.star} Star {hotel.type} </p>
         </div>
       </div>
       <div className="text-center md:text-right mt-4 md:mt-0 md:ml-4 flex flex-col justify-center">
