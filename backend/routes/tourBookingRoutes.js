@@ -4,7 +4,7 @@ import { Create, GetAllBookingByuser, GetBookingById, Update, UpdateStatus } fro
 
 const router=express.Router()
 
-router.get('/getall',protect,AccessRole(['user','admin']),GetAllBookingByuser)
+router.get('/user',protect,AccessRole(['user','admin']),GetAllBookingByuser)
 
 router.get('/get/:id',protect,AccessRole(['user','admin']),GetBookingById)
 

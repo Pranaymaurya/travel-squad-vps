@@ -28,6 +28,7 @@ import HotelViews from "./Admin/Hotel/HotelInfo"
 import Bookingcab from "./Admin/Cab/CabBooking"
 import AdminHotelBooking from "./Admin/Hotel/AdminHotelBooking"
 import AllBookingcab from "./Admin/Cab/AllCabBooking"
+import TourBooking from "./Admin/Tour/TourBooking"
 
 export default function AdminRoutes() {
   return (
@@ -48,7 +49,7 @@ export default function AdminRoutes() {
         <Route path="tour/addpackagecategory" element={<AddPackageCategory />} />
         <Route path="tour/category/edit/:categoryId" element={<EditCategory />} />
         <Route path="tour/edit/:packageId" element={<EditPackage />} />
-
+        <Route path="tour/all" element={<TourBooking />} />
         {/* Hotel routes */}
         <Route path="hotel/allhotel" element={<AllHotel />} />
         <Route path="hotel/allhotel/:id" element={<Hotelview />} />
