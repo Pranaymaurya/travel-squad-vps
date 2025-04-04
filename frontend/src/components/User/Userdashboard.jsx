@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { CalendarDays, User, Edit, Check, X, Clock, MapPin, CreditCard, Loader2 } from "lucide-react"
+import { CalendarDays, User, Edit, Check, X, Clock, MapPin, CreditCard, Loader2, RefreshCcw } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { FaSpinner } from "react-icons/fa"
 
 // Set up axios defaults
 // axios.defaults.baseURL = "/api"
@@ -376,25 +377,41 @@ const UserDashboard = () => {
           {activeTab === "bookings" && (
             <Card>
               <CardHeader>
-                <CardTitle>My Bookings</CardTitle>
+              <div className="flex justify-between items-center">
+  <CardTitle>My Bookings</CardTitle>
+  
+  <CardFooter className="flex justify-end ">
+  <RefreshCcw
+    size={20} 
+    className="cursor-pointer text-primary hover:text-primary/80" 
+    onClick={() => fetchBookingsData()} 
+  />
+</CardFooter>
+</div>
+
                 <CardDescription>View all your past and upcoming appointments.</CardDescription>
-                <div className="mt-4">
-                  <Label htmlFor="booking-type">Filter by booking type</Label>
-                  <Select
-                    value={bookingTypeFilter}
-                    onValueChange={(value) => setBookingTypeFilter(value)}
-                  >
-                    <SelectTrigger id="booking-type" className="w-full md:w-[200px]">
-                      <SelectValue placeholder="Select booking type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Bookings</SelectItem>
-                      <SelectItem value="hotel">Hotel Bookings</SelectItem>
-                      <SelectItem value="cab">Cab Bookings</SelectItem>
-                      <SelectItem value="tour">Tour Bookings</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <div className="mt-4 flex flex-col md:flex-row items-center gap-4">
+  <Label htmlFor="booking-type" className="mr-2">Filter by booking type</Label>
+  
+  <Select
+    value={bookingTypeFilter}
+    onValueChange={(value) => setBookingTypeFilter(value)}
+  >
+    <SelectTrigger id="booking-type" className="w-full md:w-[200px]">
+      <SelectValue placeholder="Select booking type" />
+    </SelectTrigger>
+    
+    <SelectContent>
+      <SelectItem value="all">All Bookings</SelectItem>
+      <SelectItem value="hotel">Hotel Bookings</SelectItem>
+      <SelectItem value="cab">Cab Bookings</SelectItem>
+      <SelectItem value="tour">Tour Bookings</SelectItem>
+    </SelectContent>
+  </Select>
+
+  
+</div>
+
               </CardHeader>
               <CardContent>
                 {bookingsLoading ? (
@@ -456,11 +473,7 @@ const UserDashboard = () => {
                   </div>
                 )}
               </CardContent>
-              <CardFooter>
-                <Button variant="outline" onClick={() => fetchBookingsData()}>
-                  Refresh Bookings
-                </Button>
-              </CardFooter>
+              
             </Card>
           )}
 

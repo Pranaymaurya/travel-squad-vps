@@ -230,6 +230,11 @@ const Sidebar = () => {
                 <Link to="/admin/tour/addtour">Add New Package</Link>
               </Button>
             )}
+            {(user.role === "admin" || canAccessRoute("tours", "update")) && (
+              <Button variant="ghost" className="w-full justify-start h-9 mb-1 text-white" asChild>
+                <Link to="/admin/tour/all">View Bookings</Link>
+              </Button>
+            )}
           </CollapsibleContent>
         )}
       </Collapsible>

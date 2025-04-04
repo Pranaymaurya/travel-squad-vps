@@ -60,7 +60,7 @@ const TourBooking = () => {
   const handleStatusChange = async (bookingId, newStatus) => {
     try {
       await axios.put(
-        `${backendUrl}/api/tour/booking/update/status/${bookingId}`,
+        `${backendUrl}/api/tour/booking/updatestatus/${bookingId}`,
         { status: newStatus },
         { withCredentials: true }
       );
