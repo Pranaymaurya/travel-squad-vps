@@ -89,7 +89,9 @@ export async function GetCabBookingById(req,res){
 
 export async function GetAllCabBookingByUser(req,res){
     try {
-        const getAllCabBooking=await CabBooking.find({user:req.user._id})
+        const id = req.params.id;
+        const getAllCabBooking=await CabBooking.find({user:id})
+        console.log(getAllCabBooking)
         res.status(200).json(getAllCabBooking);
     } catch (error) {
         return res.status(500).json({ message: 'An error occurred while getting the booking status.' });

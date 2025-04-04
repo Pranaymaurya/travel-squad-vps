@@ -93,17 +93,17 @@ export async function GetAllBookingByuserId(req, res) {
 
         // Fetch both hotel and cab bookings
         const hotelBookings = await Booking.find({ user: id });
-        const cabBookings = await CabBooking.find({ user: id });
+        // const cabBookings = await CabBooking.find({ user: id });
 
         // If no bookings are found, return a specific message
-        if (hotelBookings.length === 0 && cabBookings.length === 0) {
+        if (hotelBookings.length === 0 ) {
             return res.status(404).json({ success: false, message: "No bookings found for this user" });
         }
 
         res.json({
             success: true,
             hotelBookings,
-            cabBookings
+            // cabBookings
         });
     } catch (error) {
         console.error(error); // Log the error for debugging

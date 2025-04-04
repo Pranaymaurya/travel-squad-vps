@@ -10,7 +10,7 @@ CabBookingRouter.get('/cab/:id',protect,AccessRole(['cab','admin']),GetAllCabBoo
 CabBookingRouter.get('/cabBook/:id',protect,GetCabBookingsByCabId)
 CabBookingRouter.put('/update/:id',protect,AccessRole(['admin','cab','user']),Update)
 CabBookingRouter.put('/update/status/:id',protect,AccessRole(['admin','cab']),UpdateStatus)
-CabBookingRouter.get('/user',protect,AccessRole(['admin','user']),GetAllCabBookingByUser)
+CabBookingRouter.get('/user/:id',protect,AccessRole(['user']),GetAllCabBookingByUser)
 
 
 export default CabBookingRouter
