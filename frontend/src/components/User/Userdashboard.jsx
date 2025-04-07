@@ -13,7 +13,7 @@ import { CalendarDays, User, Edit, Check, X, Clock, MapPin, CreditCard, Loader2,
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { FaSpinner } from "react-icons/fa"
-
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 // Set up axios defaults
 // axios.defaults.baseURL = "/api"
 axios.defaults.headers.common["Content-Type"] = "application/json"
@@ -66,7 +66,9 @@ const UserDashboard = () => {
     setUserError(null)
 
     try {
-      const response = await axios.get("/api/users/profile")
+      const response = await axios.get(`${backendUrl}/api/users/profile`,{
+        withCredentials: true,
+      })
 
       // Process the user data to match expected format
       const userData = {
@@ -116,7 +118,9 @@ const UserDashboard = () => {
       // Fetch bookings based on the selected filter
       if (bookingTypeFilter === "all" || bookingTypeFilter === "hotel") {
         try {
-          const hotelResponse = await axios.get(`/api/booking/user/${id}`)
+          const hotelResponse = await axios.get(`${backendUrl}/api/booking/user/${id}`,{
+            withCredentials: true,
+          })
           
           // Check if the response data is an array or has a specific property containing the bookings
           const hotelBookings = Array.isArray(hotelResponse.data)
@@ -149,7 +153,9 @@ const UserDashboard = () => {
 
       if (bookingTypeFilter === "all" || bookingTypeFilter === "cab") {
         try {
-          const cabResponse = await axios.get(`/api/cab/booking/user/${id}`)
+          const cabResponse = await axios.get(`${backendUrl}/api/cab/booking/user/${id}`,{
+            withCredentials: true,
+          })
           console.log(cabResponse)
           // Check if the response data is an array or has a specific property containing the bookings
           const cabBookings = Array.isArray(cabResponse.data) ? cabResponse.data : cabResponse.data.cabBookings || []
@@ -180,7 +186,9 @@ const UserDashboard = () => {
 
       if (bookingTypeFilter === "all" || bookingTypeFilter === "tour") {
         try {
-          const tourResponse = await axios.get(`/api/tour/booking/user`)
+          const tourResponse = await axios.get(`${backendUrl}/api/tour/booking/user`,{
+            withCredentials: true,
+          })
           
           // Check if the response data is an array or has a specific property containing the bookings
           const tourBookings = Array.isArray(tourResponse.data)
@@ -238,7 +246,9 @@ const UserDashboard = () => {
         email: editedUser.email,
       }
 
-      const response = await axios.put("/api/users/profile", userData)
+      const response = await axios.put(`${backendUrl}/api/users/profile`, userData,{
+        withCredentials: true,
+      })
 
       // Update local user state with response data
       const updatedUserData = {
@@ -270,7 +280,9 @@ const UserDashboard = () => {
 
   const handleBookingAction = async (bookingId, action) => {
     try {
-      await axios.post(`/bookings/${bookingId}/${action}`)
+      await axios.post(`${backendUrl}/bookings/${bookingId}/${action}`,{
+        withCredentials: true,
+      })
 
       // Refresh bookings after action
       fetchBookingsData()
