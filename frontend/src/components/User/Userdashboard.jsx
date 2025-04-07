@@ -66,7 +66,7 @@ const UserDashboard = () => {
     setUserError(null)
 
     try {
-      const response = await axios.get("api/users/profile")
+      const response = await axios.get("/api/users/profile")
 
       // Process the user data to match expected format
       const userData = {
@@ -116,7 +116,7 @@ const UserDashboard = () => {
       // Fetch bookings based on the selected filter
       if (bookingTypeFilter === "all" || bookingTypeFilter === "hotel") {
         try {
-          const hotelResponse = await axios.get(`api/booking/user/${id}`)
+          const hotelResponse = await axios.get(`/api/booking/user/${id}`)
           
           // Check if the response data is an array or has a specific property containing the bookings
           const hotelBookings = Array.isArray(hotelResponse.data)
@@ -149,7 +149,7 @@ const UserDashboard = () => {
 
       if (bookingTypeFilter === "all" || bookingTypeFilter === "cab") {
         try {
-          const cabResponse = await axios.get(`api/cab/booking/user/${id}`)
+          const cabResponse = await axios.get(`/api/cab/booking/user/${id}`)
           console.log(cabResponse)
           // Check if the response data is an array or has a specific property containing the bookings
           const cabBookings = Array.isArray(cabResponse.data) ? cabResponse.data : cabResponse.data.cabBookings || []
@@ -180,7 +180,7 @@ const UserDashboard = () => {
 
       if (bookingTypeFilter === "all" || bookingTypeFilter === "tour") {
         try {
-          const tourResponse = await axios.get(`api/tour/booking/user`)
+          const tourResponse = await axios.get(`/api/tour/booking/user`)
           
           // Check if the response data is an array or has a specific property containing the bookings
           const tourBookings = Array.isArray(tourResponse.data)
@@ -238,7 +238,7 @@ const UserDashboard = () => {
         email: editedUser.email,
       }
 
-      const response = await axios.put("api/users/profile", userData)
+      const response = await axios.put("/api/users/profile", userData)
 
       // Update local user state with response data
       const updatedUserData = {
