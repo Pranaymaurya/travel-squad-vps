@@ -41,7 +41,12 @@ const UserDashboard = () => {
 
   // State for editing user profile
   const [isEditing, setIsEditing] = useState(false)
-  const [editedUser, setEditedUser] = useState(null)
+  const [editedUser, setEditedUser] = useState({
+    firstName: "",
+    lastName: "",
+    email: ""
+  })
+  
   const [updateLoading, setUpdateLoading] = useState(false)
   const [updateError, setUpdateError] = useState(null)
   const [updateSuccess, setUpdateSuccess] = useState(false)
@@ -73,6 +78,8 @@ const UserDashboard = () => {
       // Process the user data to match expected format
       const userData = {
         id: response.data._id,
+        firstName: response.data.firstName,
+        lastName: response.data.lastName,
         name: `${response.data.firstName} ${response.data.lastName}`,
         email: response.data.email,
         isAdmin: response.data.isAdmin,
@@ -84,7 +91,11 @@ const UserDashboard = () => {
       // Set the user ID for bookings
       setId(userData.id)
       setUser(userData)
-      setEditedUser(userData) // Initialize edited user with fetched user data
+      setEditedUser({
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email
+      }) // Initialize edited user with fetched user data
     } catch (error) {
       console.error("Failed to fetch user data:", error)
       setUserError(error.response?.data?.message || error.message)
@@ -92,6 +103,8 @@ const UserDashboard = () => {
       // Fallback to sample data in case of error
       const fallbackUser = {
         id: "123456",
+        firstName: "Jane",
+        lastName: "Smith",
         name: "Jane Smith",
         email: "jane.smith@example.com",
         phone: "+1 (555) 123-4567",
@@ -101,7 +114,11 @@ const UserDashboard = () => {
 
       setId(fallbackUser.id)
       setUser(fallbackUser)
-      setEditedUser(fallbackUser)
+      setEditedUser({
+        firstName: fallbackUser.firstName,
+        lastName: fallbackUser.lastName,
+        email: fallbackUser.email
+      })
     } finally {
       setUserLoading(false)
     }
@@ -234,15 +251,10 @@ const UserDashboard = () => {
     setUpdateSuccess(false)
 
     try {
-      // Parse first and last name from full name
-      const nameParts = editedUser.name.split(" ")
-      const firstName = nameParts[0]
-      const lastName = nameParts.slice(1).join(" ")
-
       // Format data for the backend
       const userData = {
-        firstName,
-        lastName,
+        firstName: editedUser.firstName,
+        lastName: editedUser.lastName,
         email: editedUser.email,
       }
 
@@ -253,6 +265,8 @@ const UserDashboard = () => {
       // Update local user state with response data
       const updatedUserData = {
         id: response.data._id,
+        firstName: response.data.firstName,
+        lastName: response.data.lastName,
         name: `${response.data.firstName} ${response.data.lastName}`,
         email: response.data.email,
         isAdmin: response.data.isAdmin,
@@ -305,7 +319,11 @@ const UserDashboard = () => {
   const handleEditToggle = () => {
     if (isEditing) {
       // Cancel editing
-      setEditedUser({ ...user })
+      setEditedUser({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      })
     }
     setIsEditing(!isEditing)
   }
@@ -390,40 +408,37 @@ const UserDashboard = () => {
             <Card>
               <CardHeader>
               <div className="flex justify-between items-center">
-  <CardTitle>My Bookings</CardTitle>
-  
-  <CardFooter className="flex justify-end ">
-  <RefreshCcw
-    size={20} 
-    className="cursor-pointer text-primary hover:text-primary/80" 
-    onClick={() => fetchBookingsData()} 
-  />
-</CardFooter>
-</div>
+                <CardTitle>My Bookings</CardTitle>
+                
+                <CardFooter className="flex justify-end ">
+                  <RefreshCcw
+                    size={20} 
+                    className="cursor-pointer text-primary hover:text-primary/80" 
+                    onClick={() => fetchBookingsData()} 
+                  />
+                </CardFooter>
+              </div>
 
                 <CardDescription>View all your past and upcoming appointments.</CardDescription>
                 <div className="mt-4 flex flex-col md:flex-row items-center gap-4">
-  <Label htmlFor="booking-type" className="mr-2">Filter by booking type</Label>
-  
-  <Select
-    value={bookingTypeFilter}
-    onValueChange={(value) => setBookingTypeFilter(value)}
-  >
-    <SelectTrigger id="booking-type" className="w-full md:w-[200px]">
-      <SelectValue placeholder="Select booking type" />
-    </SelectTrigger>
-    
-    <SelectContent>
-      <SelectItem value="all">All Bookings</SelectItem>
-      <SelectItem value="hotel">Hotel Bookings</SelectItem>
-      <SelectItem value="cab">Cab Bookings</SelectItem>
-      <SelectItem value="tour">Tour Bookings</SelectItem>
-    </SelectContent>
-  </Select>
-
-  
-</div>
-
+                  <Label htmlFor="booking-type" className="mr-2">Filter by booking type</Label>
+                  
+                  <Select
+                    value={bookingTypeFilter}
+                    onValueChange={(value) => setBookingTypeFilter(value)}
+                  >
+                    <SelectTrigger id="booking-type" className="w-full md:w-[200px]">
+                      <SelectValue placeholder="Select booking type" />
+                    </SelectTrigger>
+                    
+                    <SelectContent>
+                      <SelectItem value="all">All Bookings</SelectItem>
+                      <SelectItem value="hotel">Hotel Bookings</SelectItem>
+                      <SelectItem value="cab">Cab Bookings</SelectItem>
+                      <SelectItem value="tour">Tour Bookings</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </CardHeader>
               <CardContent>
                 {bookingsLoading ? (
@@ -485,7 +500,6 @@ const UserDashboard = () => {
                   </div>
                 )}
               </CardContent>
-              
             </Card>
           )}
 
@@ -573,11 +587,30 @@ const UserDashboard = () => {
                       <div className="space-y-4 flex-1">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="name">Full Name</Label>
+                            <Label htmlFor="firstName">First Name</Label>
                             {isEditing ? (
-                              <Input id="name" name="name" value={editedUser.name} onChange={handleInputChange} />
+                              <Input 
+                                id="firstName" 
+                                name="firstName" 
+                                value={editedUser.firstName} 
+                                onChange={handleInputChange} 
+                              />
                             ) : (
-                              <p className="text-sm p-2 border rounded-md bg-muted">{user.name}</p>
+                              <p className="text-sm p-2 border rounded-md bg-muted">{user.firstName}</p>
+                            )}
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="lastName">Last Name</Label>
+                            {isEditing ? (
+                              <Input 
+                                id="lastName" 
+                                name="lastName" 
+                                value={editedUser.lastName} 
+                                onChange={handleInputChange} 
+                              />
+                            ) : (
+                              <p className="text-sm p-2 border rounded-md bg-muted">{user.lastName}</p>
                             )}
                           </div>
 
