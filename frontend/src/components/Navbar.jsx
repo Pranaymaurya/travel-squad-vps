@@ -67,7 +67,7 @@ const Navbar = () => {
   };
 
   const navigateToBookings = () => {
-    navigate("/bookings");
+    navigate("/user");
     setDropdownOpen(false);
   };
 
@@ -107,12 +107,12 @@ const Navbar = () => {
                 {/* Dropdown Menu */}
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 py-1 border border-gray-200">
-                    <button
+                    {/* <button
                       onClick={navigateToProfile}
                       className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-150"
                     >
                       <i className="bx bxs-user-circle mr-2"></i>Profile
-                    </button>
+                    </button> */}
                     <button
                       onClick={navigateToBookings}
                       className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-150"
