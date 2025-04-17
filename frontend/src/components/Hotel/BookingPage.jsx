@@ -21,6 +21,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 import { MapPin, Star, Calendar, Users, Info, CreditCard, Gift, Shield, AlertTriangle, CheckCircle } from "lucide-react"
+import { format, addDays, differenceInDays } from "date-fns" // For date manipulation
+
+// Date picker component - Add this import
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 
 // Pre-booking confirmation dialog component
 const PreBookingConfirmationDialog = ({ isOpen, onClose, onConfirm, bookingDetails }) => {
@@ -46,15 +51,15 @@ const PreBookingConfirmationDialog = ({ isOpen, onClose, onConfirm, bookingDetai
           </div>
           <div className="flex justify-between">
             <span className="font-medium">Check-in:</span>
-            <span>{bookingDetails.checkin}</span>
+            <span>{bookingDetails.checkInDate}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-medium">Check-out:</span>
-            <span>{bookingDetails.checkout}</span>
+            <span>{bookingDetails.checkOutDate}</span>
           </div>
           <div className="flex justify-between">
             <span className="font-medium">Total Amount:</span>
-            <span className="font-bold">₹ {bookingDetails.amount}</span>
+            <span className="font-bold">₹ {bookingDetails.ammount}</span>
           </div>
         </div>
 
@@ -98,7 +103,7 @@ const BookingConfirmationModal = ({ isOpen, onClose, bookingDetails }) => {
           </div>
           <div className="flex justify-between">
             <span className="font-medium">Total Amount:</span>
-            <span className="font-bold">₹ {bookingDetails.amount}</span>
+            <span className="font-bold">₹ {bookingDetails.ammount}</span>
           </div>
         </div>
 
@@ -112,6 +117,79 @@ const BookingConfirmationModal = ({ isOpen, onClose, bookingDetails }) => {
   )
 }
 
+// Date Picker Component
+const DatePickerWithRange = ({ checkInDate, checkOutDate, onDateChange }) => {
+  const [startDate, setStartDate] = useState(new Date(checkInDate))
+  const [endDate, setEndDate] = useState(new Date(checkOutDate))
+  const [isOpen, setIsOpen] = useState(false)
+
+  const handleSelect = (date) => {
+    if (!startDate || (startDate && endDate)) {
+      setStartDate(date)
+      setEndDate(null)
+    } else if (date >= startDate) {
+      setEndDate(date)
+      setIsOpen(false)
+      
+      // Call the parent's callback with the new dates
+      onDateChange(
+        format(startDate, "yyyy-MM-dd"),
+        format(date, "yyyy-MM-dd")
+      )
+    }
+  }
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          className="w-full justify-start text-left font-normal border-dashed h-12"
+        >
+          <Calendar className="mr-2 h-4 w-4" />
+          {startDate && endDate ? (
+            <>
+              {format(startDate, "MMM dd, yyyy")} - {format(endDate, "MMM dd, yyyy")}
+              <span className="ml-auto text-xs text-muted-foreground">
+                {differenceInDays(endDate, startDate)} night{differenceInDays(endDate, startDate) !== 1 ? "s" : ""}
+              </span>
+            </>
+          ) : (
+            <span>Select check-in and check-out dates</span>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="center">
+        <CalendarComponent
+          mode="range"
+          selected={{
+            from: startDate,
+            to: endDate
+          }}
+          onSelect={(range) => {
+            if (range?.from) {
+              setStartDate(range.from)
+            }
+            if (range?.to) {
+              setEndDate(range.to)
+              setIsOpen(false)
+              
+              // Call the parent's callback with the new dates
+              onDateChange(
+                format(range.from, "yyyy-MM-dd"),
+                format(range.to, "yyyy-MM-dd")
+              )
+            }
+          }}
+          defaultMonth={startDate}
+          disabled={{ before: new Date() }}
+          numberOfMonths={2}
+        />
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 // Main BookingPage component
 const BookingPage = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL
@@ -119,6 +197,13 @@ const BookingPage = () => {
   const [isPreBookingDialogOpen, setIsPreBookingDialogOpen] = useState(false)
   const [isBookingConfirmationOpen, setIsBookingConfirmationOpen] = useState(false)
   const [bookingDetails, setBookingDetails] = useState({})
+  const [userInfo, setUserInfo] = useState({
+    fullName: "",
+    email: "",
+    mobile: "",
+    gstNumber: "",
+    state: ""
+  })
   const [hotelData, setHotelData] = useState({
     name: "Luxury Hotel & Resort",
     location: "City Center, Metro Area",
@@ -133,12 +218,15 @@ const BookingPage = () => {
 
   const locationHook = useLocation()
   const initialFilters = locationHook.state || {
-    checkin: "2023-06-15",
-    checkout: "2023-06-17",
+    checkInDate: format(new Date(), "yyyy-MM-dd"),
+    checkOutDate: format(addDays(new Date(), 2), "yyyy-MM-dd"),
     guests: "2",
   }
   const [filters, setFilters] = useState(initialFilters)
   const p = useParams()
+
+  // Calculate nights based on check-in and check-out dates
+  const nights = differenceInDays(new Date(filters.checkOutDate), new Date(filters.checkInDate))
 
   useEffect(() => {
     const fetchHotelData = async () => {
@@ -153,14 +241,44 @@ const BookingPage = () => {
     if (p.id) {
       fetchHotelData()
     }
-  }, [p.id]) // Removed backendUrl from dependencies
+  }, [p.id])
+
+  const handleDateChange = (newCheckIn, newCheckOut) => {
+    setFilters(prev => ({
+      ...prev,
+      checkInDate: newCheckIn,
+      checkOutDate: newCheckOut
+    }))
+  }
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target
+    setUserInfo(prev => ({
+      ...prev,
+      [id]: value
+    }))
+  }
+
+  const handleStateChange = (value) => {
+    setUserInfo(prev => ({
+      ...prev,
+      state: value
+    }))
+  }
 
   const handleBookingSubmit = async () => {
     try {
-      // Prepare booking data matching backend requirements
+      // Calculate total amount
+      const totalAmount = roomCount * (hotelData.price + hotelData.taxes) * nights
+      
+      // Prepare booking data matching backend requirements exactly
       const bookingData = {
         hotel: hotelData._id, // Assuming hotelData contains the hotel ID
         roomCount: roomCount,
+        ammount: totalAmount, // Note: Matching the backend spelling
+        checkInDate: new Date(filters.checkInDate).toISOString(),
+        checkOutDate: new Date(filters.checkOutDate).toISOString(),
+        // User info will be handled by the backend using the authenticated user
       }
 
       // Send booking request
@@ -173,7 +291,6 @@ const BookingPage = () => {
       const confirmationDetails = {
         ...response.data.message, // Backend returns the booking object
         hotelName: hotelData.name,
-        amount: response.data.message.ammount, // Note: matching backend's spelling
       }
 
       // Open booking confirmation modal
@@ -186,13 +303,16 @@ const BookingPage = () => {
   }
 
   const openPreBookingConfirmation = () => {
+    // Calculate total amount
+    const totalAmount = roomCount * (hotelData.price + hotelData.taxes) * nights
+    
     // Prepare pre-booking details
     const preBookingDetails = {
       hotelName: hotelData.name,
       roomCount: roomCount,
-      checkin: filters.checkin,
-      checkout: filters.checkout,
-      amount: roomCount * hotelData.price,
+      checkInDate: format(new Date(filters.checkInDate), "EEE, MMM dd, yyyy"),
+      checkOutDate: format(new Date(filters.checkOutDate), "EEE, MMM dd, yyyy"),
+      ammount: totalAmount, // Note: Matching the backend spelling 'ammount'
     }
 
     setBookingDetails(preBookingDetails)
@@ -261,22 +381,32 @@ const BookingPage = () => {
               </div>
             </CardHeader>
             <CardContent>
+              {/* Date Selection */}
+              <div className="mb-4">
+                <Label className="text-base font-medium mb-2 block">Select Dates</Label>
+                <DatePickerWithRange 
+                  checkInDate={filters.checkInDate} 
+                  checkOutDate={filters.checkOutDate} 
+                  onDateChange={handleDateChange}
+                />
+              </div>
+              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div className="space-y-2">
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-primary" />
                     <span className="font-medium">Check-in:</span>
-                    <span className="ml-2">{filters.checkin}</span>
+                    <span className="ml-2">{format(new Date(filters.checkInDate), "EEE, MMM dd, yyyy")}</span>
                   </div>
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-primary" />
                     <span className="font-medium">Check-out:</span>
-                    <span className="ml-2">{filters.checkout}</span>
+                    <span className="ml-2">{format(new Date(filters.checkOutDate), "EEE, MMM dd, yyyy")}</span>
                   </div>
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-2 text-primary" />
                     <span>
-                      2 Nights | 2 Adults | {roomCount} Room{roomCount > 1 ? "s" : ""}
+                      {nights} Night{nights > 1 ? "s" : ""} | 2 Adults | {roomCount} Room{roomCount > 1 ? "s" : ""}
                     </span>
                   </div>
                 </div>
@@ -354,19 +484,40 @@ const BookingPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
-                  <Input id="fullName" placeholder="Enter your full name" />
+                  <Input 
+                    id="fullName" 
+                    placeholder="Enter your full name"
+                    value={userInfo.fullName}
+                    onChange={handleInputChange}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" type="email" placeholder="your@email.com" />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="your@email.com"
+                    value={userInfo.email}
+                    onChange={handleInputChange}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="mobile">Mobile Number</Label>
-                  <Input id="mobile" placeholder="+91 9876543210" />
+                  <Input 
+                    id="mobile" 
+                    placeholder="+91 9876543210"
+                    value={userInfo.mobile}
+                    onChange={handleInputChange}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="gst">GST Details (Optional)</Label>
-                  <Input id="gst" placeholder="GST Number" />
+                  <Label htmlFor="gstNumber">GST Details (Optional)</Label>
+                  <Input 
+                    id="gstNumber" 
+                    placeholder="GST Number"
+                    value={userInfo.gstNumber}
+                    onChange={handleInputChange}
+                  />
                 </div>
               </div>
             </CardContent>
@@ -379,7 +530,7 @@ const BookingPage = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <Select>
+                <Select onValueChange={handleStateChange} value={userInfo.state}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select your state" />
                   </SelectTrigger>
@@ -440,13 +591,13 @@ const BookingPage = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span>
-                      {roomCount} Room{roomCount > 1 ? "s" : ""} x 2 Nights
+                      {roomCount} Room{roomCount > 1 ? "s" : ""} x {nights} Night{nights > 1 ? "s" : ""}
                     </span>
-                    <span>₹ {(roomCount * hotelData.price).toLocaleString()}</span>
+                    <span>₹ {(roomCount * hotelData.price * nights).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Hotel Taxes</span>
-                    <span>₹ {(roomCount * hotelData.taxes).toLocaleString()}</span>
+                    <span>₹ {(roomCount * hotelData.taxes * nights).toLocaleString()}</span>
                   </div>
 
                   <div className="flex items-start space-x-2 text-sm">
@@ -468,7 +619,7 @@ const BookingPage = () => {
 
                 <div className="flex justify-between font-medium">
                   <span>Total Amount</span>
-                  <span>₹ {(roomCount * (hotelData.price + hotelData.taxes)).toLocaleString()}</span>
+                  <span>₹ {(roomCount * (hotelData.price + hotelData.taxes) * nights).toLocaleString()}</span>
                 </div>
               </div>
             </CardContent>
@@ -540,7 +691,7 @@ const BookingPage = () => {
 
           {/* Pay Now Button */}
           <Button size="lg" className="w-full text-lg py-6" onClick={openPreBookingConfirmation}>
-            Pay Now (₹ {(roomCount * (hotelData.price + hotelData.taxes)).toLocaleString()})
+            Pay Now (₹ {(roomCount * (hotelData.price + hotelData.taxes) * nights).toLocaleString()})
           </Button>
         </div>
       </div>
@@ -564,4 +715,3 @@ const BookingPage = () => {
 }
 
 export default BookingPage
-

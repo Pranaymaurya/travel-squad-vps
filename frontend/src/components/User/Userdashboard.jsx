@@ -138,7 +138,7 @@ const UserDashboard = () => {
           const hotelResponse = await axios.get(`${backendUrl}/api/booking/user/${id}`,{
             withCredentials: true,
           })
-          
+          console.log(hotelResponse)
           // Check if the response data is an array or has a specific property containing the bookings
           const hotelBookings = Array.isArray(hotelResponse.data)
             ? hotelResponse.data
@@ -661,7 +661,7 @@ const UserDashboard = () => {
               <DialogHeader>
                 <DialogTitle>Booking Details</DialogTitle>
                 <DialogDescription>
-                  {selectedBooking.service} - {selectedBooking.id}
+                   {selectedBooking.id}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
@@ -672,7 +672,7 @@ const UserDashboard = () => {
                   <div>
                     <h4 className="text-sm font-medium">Date & Time</h4>
                     <div className="text-sm text-muted-foreground">
-                      {selectedBooking.date} at {selectedBooking.time}
+                      {selectedBooking.date}
                     </div>
                   </div>
                 </div>

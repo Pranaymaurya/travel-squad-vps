@@ -4,25 +4,50 @@ import Hotel from "../models/hotelModel.js";
 
 export async function Create(req, res) {
     try {
-        const { hotel, roomCount } = req.body;
-        const getHotel = await Hotel.findById(hotel)
-        if (!getHotel) return res.status(404).json({ success: false, message: "Hotel Not Found" })
+        const { hotel, roomCount, checkInDate, checkOutDate } = req.body;
+
+        const getHotel = await Hotel.findById(hotel);
+        if (!getHotel) {
+            return res.status(404).json({ success: false, message: "Hotel Not Found" });
+        }
+
+        // Convert to Date objects
+        const checkIn = new Date(checkInDate);
+        const checkOut = new Date(checkOutDate);
+
+        // Validate date range
+        if (checkOut <= checkIn) {
+            return res.status(400).json({ success: false, message: "Check-out must be after check-in" });
+        }
+
+        // Calculate number of nights
+        const millisecondsPerDay = 1000 * 60 * 60 * 24;
+        const numberOfNights = Math.ceil((checkOut - checkIn) / millisecondsPerDay);
+
+        // Calculate total amount
+        const totalAmount = numberOfNights * roomCount * getHotel.price;
 
         const booking = new Booking({
             user: req.user._id,
             hotel,
             roomCount,
-            ammount: roomCount * getHotel.price,
+            checkInDate: checkIn,
+            checkOutDate: checkOut,
+            ammount: totalAmount,
         });
-        getHotel.NumberofRooms = getHotel.NumberofRooms - roomCount
-        await getHotel.save()
-        await booking.save()
-        res.status(200).json({ success: true, message: booking })
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Internal Server Error" })
-    }
 
+        // Update hotel room availability
+        getHotel.NumberofRooms -= roomCount;
+        await getHotel.save();
+        await booking.save();
+
+        res.status(200).json({ success: true, message: booking });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
 }
+
 
 export async function GetBookingById(req, res) {
     try {
