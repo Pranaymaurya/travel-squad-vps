@@ -27,6 +27,9 @@ import { format, addDays, differenceInDays } from "date-fns" // For date manipul
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 
+// Add a constant tax rate at the top of the file, just before the PreBookingConfirmationDialog component
+const TAX_RATE = 0.10 // 18% tax rate
+
 // Pre-booking confirmation dialog component
 const PreBookingConfirmationDialog = ({ isOpen, onClose, onConfirm, bookingDetails }) => {
   return (
@@ -59,7 +62,7 @@ const PreBookingConfirmationDialog = ({ isOpen, onClose, onConfirm, bookingDetai
           </div>
           <div className="flex justify-between">
             <span className="font-medium">Total Amount:</span>
-            <span className="font-bold">₹ {bookingDetails.ammount}</span>
+            <span className="font-bold">₹ {bookingDetails.amount}</span>
           </div>
         </div>
 
@@ -103,7 +106,7 @@ const BookingConfirmationModal = ({ isOpen, onClose, bookingDetails }) => {
           </div>
           <div className="flex justify-between">
             <span className="font-medium">Total Amount:</span>
-            <span className="font-bold">₹ {bookingDetails.ammount}</span>
+            <span className="font-bold">₹ {bookingDetails.totalAmount}</span>
           </div>
         </div>
 
@@ -130,22 +133,16 @@ const DatePickerWithRange = ({ checkInDate, checkOutDate, onDateChange }) => {
     } else if (date >= startDate) {
       setEndDate(date)
       setIsOpen(false)
-      
+
       // Call the parent's callback with the new dates
-      onDateChange(
-        format(startDate, "yyyy-MM-dd"),
-        format(date, "yyyy-MM-dd")
-      )
+      onDateChange(format(startDate, "yyyy-MM-dd"), format(date, "yyyy-MM-dd"))
     }
   }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-full justify-start text-left font-normal border-dashed h-12"
-        >
+        <Button variant="outline" className="w-full justify-start text-left font-normal border-dashed h-12">
           <Calendar className="mr-2 h-4 w-4" />
           {startDate && endDate ? (
             <>
@@ -164,7 +161,7 @@ const DatePickerWithRange = ({ checkInDate, checkOutDate, onDateChange }) => {
           mode="range"
           selected={{
             from: startDate,
-            to: endDate
+            to: endDate,
           }}
           onSelect={(range) => {
             if (range?.from) {
@@ -173,12 +170,9 @@ const DatePickerWithRange = ({ checkInDate, checkOutDate, onDateChange }) => {
             if (range?.to) {
               setEndDate(range.to)
               setIsOpen(false)
-              
+
               // Call the parent's callback with the new dates
-              onDateChange(
-                format(range.from, "yyyy-MM-dd"),
-                format(range.to, "yyyy-MM-dd")
-              )
+              onDateChange(format(range.from, "yyyy-MM-dd"), format(range.to, "yyyy-MM-dd"))
             }
           }}
           defaultMonth={startDate}
@@ -202,7 +196,7 @@ const BookingPage = () => {
     email: "",
     mobile: "",
     gstNumber: "",
-    state: ""
+    state: "",
   })
   const [hotelData, setHotelData] = useState({
     name: "Luxury Hotel & Resort",
@@ -244,38 +238,43 @@ const BookingPage = () => {
   }, [p.id])
 
   const handleDateChange = (newCheckIn, newCheckOut) => {
-    setFilters(prev => ({
+    setFilters((prev) => ({
       ...prev,
       checkInDate: newCheckIn,
-      checkOutDate: newCheckOut
+      checkOutDate: newCheckOut,
     }))
   }
 
   const handleInputChange = (e) => {
     const { id, value } = e.target
-    setUserInfo(prev => ({
+    setUserInfo((prev) => ({
       ...prev,
-      [id]: value
+      [id]: value,
     }))
   }
 
   const handleStateChange = (value) => {
-    setUserInfo(prev => ({
+    setUserInfo((prev) => ({
       ...prev,
-      state: value
+      state: value,
     }))
   }
 
+  // Replace the calculation in the handleBookingSubmit function
   const handleBookingSubmit = async () => {
     try {
+      // Calculate base amount
+      const baseAmount = roomCount * hotelData.price * nights
+      // Calculate tax amount using the tax rate
+      const taxAmount = baseAmount * TAX_RATE
       // Calculate total amount
-      const totalAmount = roomCount * (hotelData.price + hotelData.taxes) * nights
-      
+      const totalAmount = baseAmount + taxAmount
+
       // Prepare booking data matching backend requirements exactly
       const bookingData = {
         hotel: hotelData._id, // Assuming hotelData contains the hotel ID
         roomCount: roomCount,
-        ammount: totalAmount, // Note: Matching the backend spelling
+        amount: totalAmount, // Note: Matching the backend spelling
         checkInDate: new Date(filters.checkInDate).toISOString(),
         checkOutDate: new Date(filters.checkOutDate).toISOString(),
         // User info will be handled by the backend using the authenticated user
@@ -302,17 +301,22 @@ const BookingPage = () => {
     }
   }
 
+  // Replace the calculation in the openPreBookingConfirmation function
   const openPreBookingConfirmation = () => {
+    // Calculate base amount
+    const baseAmount = roomCount * hotelData.price * nights
+    // Calculate tax amount using the tax rate
+    const taxAmount = baseAmount * TAX_RATE
     // Calculate total amount
-    const totalAmount = roomCount * (hotelData.price + hotelData.taxes) * nights
-    
+    const totalAmount = baseAmount + taxAmount
+
     // Prepare pre-booking details
     const preBookingDetails = {
       hotelName: hotelData.name,
       roomCount: roomCount,
       checkInDate: format(new Date(filters.checkInDate), "EEE, MMM dd, yyyy"),
       checkOutDate: format(new Date(filters.checkOutDate), "EEE, MMM dd, yyyy"),
-      ammount: totalAmount, // Note: Matching the backend spelling 'ammount'
+      amount: totalAmount,
     }
 
     setBookingDetails(preBookingDetails)
@@ -384,13 +388,13 @@ const BookingPage = () => {
               {/* Date Selection */}
               <div className="mb-4">
                 <Label className="text-base font-medium mb-2 block">Select Dates</Label>
-                <DatePickerWithRange 
-                  checkInDate={filters.checkInDate} 
-                  checkOutDate={filters.checkOutDate} 
+                <DatePickerWithRange
+                  checkInDate={filters.checkInDate}
+                  checkOutDate={filters.checkOutDate}
                   onDateChange={handleDateChange}
                 />
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div className="space-y-2">
                   <div className="flex items-center">
@@ -484,8 +488,8 @@ const BookingPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">Full Name</Label>
-                  <Input 
-                    id="fullName" 
+                  <Input
+                    id="fullName"
                     placeholder="Enter your full name"
                     value={userInfo.fullName}
                     onChange={handleInputChange}
@@ -493,9 +497,9 @@ const BookingPage = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
+                  <Input
+                    id="email"
+                    type="email"
                     placeholder="your@email.com"
                     value={userInfo.email}
                     onChange={handleInputChange}
@@ -503,8 +507,8 @@ const BookingPage = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="mobile">Mobile Number</Label>
-                  <Input 
-                    id="mobile" 
+                  <Input
+                    id="mobile"
                     placeholder="+91 9876543210"
                     value={userInfo.mobile}
                     onChange={handleInputChange}
@@ -512,8 +516,8 @@ const BookingPage = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="gstNumber">GST Details (Optional)</Label>
-                  <Input 
-                    id="gstNumber" 
+                  <Input
+                    id="gstNumber"
                     placeholder="GST Number"
                     value={userInfo.gstNumber}
                     onChange={handleInputChange}
@@ -595,9 +599,10 @@ const BookingPage = () => {
                     </span>
                     <span>₹ {(roomCount * hotelData.price * nights).toLocaleString()}</span>
                   </div>
+                  {/* Find the section with "Price Summary" and replace the tax calculation with: */}
                   <div className="flex justify-between text-sm">
-                    <span>Hotel Taxes</span>
-                    <span>₹ {(roomCount * hotelData.taxes * nights).toLocaleString()}</span>
+                    <span>Hotel Taxes ({(TAX_RATE * 100).toFixed(0)}%)</span>
+                    <span>₹ {(roomCount * hotelData.price * nights * TAX_RATE).toLocaleString()}</span>
                   </div>
 
                   <div className="flex items-start space-x-2 text-sm">
@@ -617,9 +622,10 @@ const BookingPage = () => {
 
                 <Separator />
 
+                {/* Update the Total Amount calculation in the Price Summary section */}
                 <div className="flex justify-between font-medium">
                   <span>Total Amount</span>
-                  <span>₹ {(roomCount * (hotelData.price + hotelData.taxes) * nights).toLocaleString()}</span>
+                  <span>₹ {(roomCount * hotelData.price * nights * (1 + TAX_RATE)).toLocaleString()}</span>
                 </div>
               </div>
             </CardContent>
@@ -690,8 +696,9 @@ const BookingPage = () => {
           </Card>
 
           {/* Pay Now Button */}
+          {/* Update the Pay Now button text at the bottom of the right column */}
           <Button size="lg" className="w-full text-lg py-6" onClick={openPreBookingConfirmation}>
-            Pay Now (₹ {(roomCount * (hotelData.price + hotelData.taxes) * nights).toLocaleString()})
+            Pay Now (₹ {(roomCount * hotelData.price * nights * (1 + TAX_RATE)).toLocaleString()})
           </Button>
         </div>
       </div>

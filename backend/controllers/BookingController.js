@@ -2,9 +2,11 @@ import Booking from "../models/booking.js";
 import CabBooking from "../models/cabBookingModel.js";
 import Hotel from "../models/hotelModel.js";
 
+
+
 export async function Create(req, res) {
     try {
-        const { hotel, roomCount, checkInDate, checkOutDate } = req.body;
+        const { hotel, roomCount, checkInDate, checkOutDate, taxRate = 10 } = req.body;
 
         const getHotel = await Hotel.findById(hotel);
         if (!getHotel) {
@@ -24,16 +26,19 @@ export async function Create(req, res) {
         const millisecondsPerDay = 1000 * 60 * 60 * 24;
         const numberOfNights = Math.ceil((checkOut - checkIn) / millisecondsPerDay);
 
-        // Calculate total amount
-        const totalAmount = numberOfNights * roomCount * getHotel.price;
+        // Calculate base amount (before tax)
+        const baseAmount = numberOfNights * roomCount * getHotel.price;
 
+        // Create booking
         const booking = new Booking({
             user: req.user._id,
             hotel,
             roomCount,
             checkInDate: checkIn,
             checkOutDate: checkOut,
-            ammount: totalAmount,
+            amount: baseAmount,
+            taxRate
+            // totalAmount will be auto-calculated in schema
         });
 
         // Update hotel room availability

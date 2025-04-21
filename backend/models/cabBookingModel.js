@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const cabBookingBookingSchema = new mongoose.Schema(
+const cabBookingSchema = new mongoose.Schema(
   {
     cab: {
       type: mongoose.Schema.Types.ObjectId,
@@ -8,7 +8,7 @@ const cabBookingBookingSchema = new mongoose.Schema(
       required: true,
     },
     user: {
-      type:mongoose. Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
@@ -32,9 +32,18 @@ const cabBookingBookingSchema = new mongoose.Schema(
       enum: ["pending", "confirmed", "completed", "cancelled"],
       default: "pending",
     },
-    totalAmount: {
+    amount: {
       type: Number,
       required: true,
+    },
+    taxRate: {
+      type: Number, // Percentage (e.g., 10 for 10%)
+      default: 0,
+      required: true,
+    },
+    totalAmount: {
+      type: Number,
+      
     },
   },
   {
@@ -42,5 +51,11 @@ const cabBookingBookingSchema = new mongoose.Schema(
   }
 );
 
-const CabBooking = mongoose.model("CabBooking", cabBookingBookingSchema);
+// Auto-calculate totalAmount before saving
+cabBookingSchema.pre("save", function (next) {
+  this.totalAmount = this.amount + (this.amount * this.taxRate / 100);
+  next();
+});
+
+const CabBooking = mongoose.model("CabBooking", cabBookingSchema);
 export default CabBooking;

@@ -1,19 +1,37 @@
 import tourBooking from "../models/tourBookingModel.js";
 import Tour from "../models/tourModel.js";
 
-export const Create=async (req,res)=>{
+export const Create = async (req, res) => {
     try {
-        const {tourId,bookingDate}=req.body;
-        const userId=req.user._id
-        const tourData=await Tour.findById(tourId);
-        if(!tourData) return res.status(404).json({success:false,message:"Tour Not Found"})
-        const booking=await tourBooking.create({tour:tourId,user:userId,ammount:tourData
-    .price,bookingDate});
-        res.status(201).json(booking);
+        const { tourId, bookingDate, taxRate = 10 } = req.body; // default tax rate if not provided
+        const userId = req.user._id;
+
+        const tourData = await Tour.findById(tourId);
+        if (!tourData) {
+            return res.status(404).json({ success: false, message: "Tour Not Found" });
+        }
+
+        const booking = await tourBooking.create({
+            tour: tourId,
+            user: userId,
+            amount: tourData.price,
+            taxRate,
+            bookingDate
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Booking created successfully",
+            data: booking
+        });
+
     } catch (error) {
-        res.status(500).json({message:error.message});
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
-}
+};
 
 export const GetBookingById=async(req,res)=>{
     try {

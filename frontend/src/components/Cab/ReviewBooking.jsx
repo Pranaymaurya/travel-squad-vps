@@ -20,29 +20,12 @@ const ReviewBooking = () => {
 
   const location = useLocation();
   const initialFilters = location.state || {
- //city: "",
-    //checkin: formatDate(new Date()),
-    //checkout: formatDate(new Date()),
     date: formatDate(new Date()),
     hours: new Date().getHours(),
     minutes: new Date().getMinutes(),
     sourceLocation: "",
     destLocation: "",
-    // model: "",
-    // type: [],
-    // seats: [],
-    // kmsIncluded: "",
-    // extraKmFare: "",
-    // fuelType: [],
-    // cancellation: "",
-    // rating: "",
-    // reviewCount: "",
-    // originalPrice: "",
-    // discountedPrice : "",
-    // taxes:"",
   };
-
-
 
   const [filters, setFilters] = useState(initialFilters);
   console.log(filters)
@@ -51,8 +34,7 @@ const ReviewBooking = () => {
   const [pickupAddress, setPickupAddress] = useState("");
   const [pickuptime, setPickuptime] = useState("")
   const [dropofftime, setDropofftime] = useState("");
- 
-  const [dropoffAddress,  setDropoffAddress] = useState("");
+  const [dropoffAddress, setDropoffAddress] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [gender, setGender] = useState("");
@@ -65,6 +47,10 @@ const ReviewBooking = () => {
   const [bookingConfirmationDetails, setBookingConfirmationDetails] = useState({});
   const [isConfirmationDialogOpen, setIsConfirmationDialogOpen] = useState(false);
   const [bookingDetailsForConfirmation, setBookingDetailsForConfirmation] = useState({});
+  
+  // New state for manual tax option
+  const [useManualTax, setUseManualTax] = useState(false);
+  const [taxRate, setTaxRate] = useState(10); // Default tax rate
 
   const handleCheckboxChange = () => {
     setUsePickupAsBilling(!usePickupAsBilling);
@@ -74,9 +60,13 @@ const ReviewBooking = () => {
     setPaymentType(type);
   };
 
+  const handleManualTaxChange = () => {
+    setUseManualTax(!useManualTax);
+  };
 
-
-  
+  const handleTaxRateChange = (e) => {
+    setTaxRate(parseFloat(e.target.value) || 0);
+  };
 
   const [cabData, setCabData] = useState({});
   const p = useParams();
@@ -86,7 +76,7 @@ const ReviewBooking = () => {
       try {
         const { data } = await axios.get(`${backendUrl}/api/cab/${p.id}`, { withCredentials: true});
         setCabData(data);
-        console.log(data)
+        
       } catch (error) {
         console.error("Error fetching hotel data:", error);
       }
@@ -94,6 +84,12 @@ const ReviewBooking = () => {
     fetchCabData();
   }, [p.id]);
 
+  // Calculate tax amount based on cab price and tax rate
+  const baseAmount = cabData.discountedPrice || 0;
+  const calculatedTaxRate = taxRate
+  const taxAmount = (baseAmount * calculatedTaxRate) / 100;
+  const totalWithTax = baseAmount + taxAmount;
+console.log(totalWithTax)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -103,7 +99,7 @@ const ReviewBooking = () => {
       pickupLocation: pickupAddress,
       dropoffLocation: dropoffAddress,
       pickupTime: pickuptime,
-      totalAmount: discountedPrice
+      totalAmount: totalWithTax
     };
 
     // Open confirmation dialog instead of directly submitting
@@ -116,9 +112,10 @@ const ReviewBooking = () => {
       pickupLocation: pickupAddress,
       dropoffLocation: dropoffAddress,
       pickupTime: pickuptime,
-      dropofftime,
-      totalAmount: discountedPrice,
+      dropoffTime: dropofftime,
+      amount: totalWithTax,
       cab: p.id,
+      // taxRate: useManualTax ? taxRate : undefined, // Only send taxRate if manual tax is enabled
     };
 
     try {
@@ -130,7 +127,7 @@ const ReviewBooking = () => {
         cabModel: cabData.model,
         pickupLocation: pickupAddress,
         pickupTime: pickuptime,
-        totalAmount: discountedPrice
+        totalAmount: totalWithTax
       });
 
       // Open the confirmation modal
@@ -140,55 +137,8 @@ const ReviewBooking = () => {
       // Handle error (e.g., show error message)
     }
   };
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault(); // Prevent the default form submission
-
-  //   const bookingData = {
-  //     pickupLocation:pickupAddress,
-  //     dropoffLocation:dropoffAddress,
-  //     pickupTime:pickuptime,
-  //     dropofftime,
-  //     // usePickupAsBilling,
-  //     // name,
-  //     // email,
-  //     // gender,
-  //     // contactNumber,
-  //     // paymentType,
-  //     // couponCode,
-  //     totalAmount: discountedPrice
-  //     ,
-  //     cab:p.id,
-  //     // filters,
-  //     // cabData,
-  //   };
-
-  //   try {
-  //     console.log(bookingData)
-  //     const response = await axios.post(`${backendUrl}/api/cab/booking/create`, bookingData, { withCredentials: true });
-  //     console.log("Booking successful:", response.data);
-  //     setBookingConfirmationDetails({
-  //       bookingId: response.data._id,
-  //       cabModel: cabData.model,
-  //       pickupLocation: pickupAddress,
-  //       pickupTime: pickuptime,
-  //       totalAmount: discountedPrice
-  //     });
-
-  //     // Open the confirmation modal
-  //     setIsConfirmationModalOpen(true);
-  //     // Handle success (e.g., redirect to a confirmation page)
-  //   } catch (error) {
-  //     console.error("Error sending booking data:", error);
-  //     // Handle error (e.g., show an error message)
-  //   }
-  // };
-
-  
 
   const {
-  //city: "",
-    //checkin: formatDate(new Date()),
-    //checkout: formatDate(new Date()),
     date,
     hours,
     minutes,
@@ -208,8 +158,6 @@ const ReviewBooking = () => {
     inclusions=[],
     exclusions=[],
   } = cabData;
-
-  
 
   return (
     <>
@@ -340,13 +288,60 @@ const ReviewBooking = () => {
                   Use pickup location as billing address
                 </label>
               </div>
+              
+              {/* Manual Tax Option */}
+              <div className="mb-4 border-t pt-4">
+                {/* <div className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    id="manual-tax"
+                    className="mr-2"
+                    checked={useManualTax}
+                    onChange={handleManualTaxChange}
+                  />
+                  <label htmlFor="manual-tax" className="font-medium">
+                    Set manual tax rate
+                  </label>
+                </div> */}
+                
+                {useManualTax && (
+                  <div className="ml-6 mt-2">
+                    <label className="block mb-2">Tax Rate (%)</label>
+                    <input
+                      type="number"
+                      className="w-full p-2 border border-gray-300 rounded"
+                      value={taxRate}
+                      onChange={handleTaxRateChange}
+                      min="0"
+                      step="0.1"
+                    />
+                  </div>
+                )}
+                
+                <div className="mt-4 bg-gray-50 p-4 rounded-md">
+                  <h4 className="font-medium mb-2">Price Breakdown</h4>
+                  <div className="space-y-1">
+                    <div className="flex justify-between">
+                      <span>Base Amount:</span>
+                      <span>₹ {baseAmount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Tax ({calculatedTaxRate}%):</span>
+                      <span>₹ {taxAmount.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold border-t pt-1 mt-1">
+                      <span>Total Amount:</span>
+                      <span>₹ {totalWithTax.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
               <div className="mb-4">
                 <button type="submit" className="text-lg font-semibold bg-sky-950 hover:bg-sky-700 text-white rounded p-3 w-full">
-                  Amount: ₹ {discountedPrice}
-
+                  Book Now - ₹ {totalWithTax.toFixed(2)}
                 </button>
               </div>
-
             </form>
           </div>
           <div className="border border-slate-400 rounded-md p-4 mb-4">
@@ -458,8 +453,7 @@ const ReviewBooking = () => {
               </div>
               <div className="mb-4">
                 <button className="text-lg font-semibold bg-sky-950 hover:bg-sky-700 text-white rounded p-3 w-full">
-                  Amount: ₹ {discountedPrice
-                  }
+                  Amount: ₹ {totalWithTax.toFixed(2)}
                 </button>
               </div>
               <div className="text-green-600">
@@ -467,16 +461,16 @@ const ReviewBooking = () => {
               </div>
             </div>
             <BookingConfirmationModal 
-        isOpen={isConfirmationModalOpen}
-        onClose={() => setIsConfirmationModalOpen(false)}
-        bookingDetails={bookingConfirmationDetails}
-      />
-      <PreBookingConfirmationDialog 
-        isOpen={isConfirmationDialogOpen}
-        onClose={() => setIsConfirmationDialogOpen(false)}
-        onConfirm={handleConfirmBooking}
-        bookingDetails={bookingDetailsForConfirmation}
-      />
+              isOpen={isConfirmationModalOpen}
+              onClose={() => setIsConfirmationModalOpen(false)}
+              bookingDetails={bookingConfirmationDetails}
+            />
+            <PreBookingConfirmationDialog 
+              isOpen={isConfirmationDialogOpen}
+              onClose={() => setIsConfirmationDialogOpen(false)}
+              onConfirm={handleConfirmBooking}
+              bookingDetails={bookingDetailsForConfirmation}
+            />
           </div>
         </div>
       </div>

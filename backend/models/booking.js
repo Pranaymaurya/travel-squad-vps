@@ -15,17 +15,24 @@ const bookingSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    ammount: {
+    amount: {
         type: Number,
         required: true
     },
+    taxRate: {
+        type: Number, // Percentage (e.g., 10 for 10%)
+        required: true,
+        default: 0
+    },
+    totalAmount: {
+        type: Number,
+        
+    },
     checkInDate: {
         type: Date,
-        
     },
     checkOutDate: {
         type: Date,
-        
     },
     bookingDate: {
         type: Date,
@@ -38,6 +45,12 @@ const bookingSchema = new mongoose.Schema({
         default: 'Pending'
     }
 }, { timestamps: true });
+
+// Auto-calculate totalAmount before saving
+bookingSchema.pre('save', function (next) {
+    this.totalAmount = this.amount + (this.amount * this.taxRate / 100);
+    next();
+});
 
 const Booking = mongoose.model('Booking', bookingSchema);
 export default Booking;

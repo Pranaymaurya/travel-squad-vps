@@ -98,36 +98,37 @@ const Ptour = () => {
       });
       return;
     }
-
+  
     try {
       setBookingStatus({
         isLoading: true,
         success: false,
         error: null
       });
-
+  
       const response = await axios.post(
-        `${backendUrl}/api/tour/booking/create`, 
+        `${backendUrl}/api/tour/booking/create`,
         {
           tourId: id,
           bookingDate: selectedDate,
-          persons: numberOfPersons
+          persons: numberOfPersons,
+          taxRate: 10 // optional if your backend uses a default
         },
         { withCredentials: true }
       );
-
+  
       setBookingStatus({
         isLoading: false,
         success: true,
         error: null
       });
-
+  
       // Reset the form
       setSelectedDate("");
       setNumberOfPersons(1);
-
-      // Optional: You can redirect to booking confirmation page here
-      // navigate(`/booking-confirmation/${response.data._id}`);
+  
+      // Optional: Navigate to a booking confirmation page
+      // navigate(`/booking-confirmation/${response.data.data._id}`);
     } catch (error) {
       console.error("Booking error:", error);
       setBookingStatus({
@@ -137,7 +138,7 @@ const Ptour = () => {
       });
     }
   };
-
+  
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-50">

@@ -2,37 +2,51 @@ import CabBooking from "../models/cabBookingModel.js";
 import Cab from "../models/cabModel.js";
 import User from "../models/userModel.js";
 
-export async function Create(req,res){
-try {
-    const { cab, pickupLocation, dropoffLocation, pickupTime, dropoffTime, totalAmount } = req.body;
-    const user=req.user._id
-        // Validate required fields
-        if (!cab ||  !pickupLocation || !dropoffLocation || !pickupTime || !totalAmount) {
-            return res.status(400).json({ message: 'All required fields must be provided.' });
-        }
-        const foundCab = await Cab.findById(cab);
-        const foundUser = await User.findById(user);
-        if (!foundCab || !foundUser) {
-            return res.status(404).json({ message: 'Cab or User not found.' });
-        }
-        // Create new booking
-        const newBooking = new CabBooking({
-            cab,
-            user,
-            pickupLocation,
-            dropoffLocation,
-            pickupTime,
-            dropoffTime,
-            totalAmount,
-        });
-        // Save the booking to the database
-        const savedBooking = await newBooking.save();
-        return res.status(201).json(savedBooking);
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'An error occurred while creating the booking.' });
+
+
+export async function Create(req, res) {
+  try {
+    const { cab, pickupLocation, dropoffLocation, pickupTime, dropoffTime } = req.body;
+    const user = req.user._id;
+
+    // Validate required fields
+    if (!cab || !pickupLocation || !dropoffLocation || !pickupTime) {
+      return res.status(400).json({ message: 'All required fields must be provided.' });
     }
+
+    // Find Cab and User
+    const foundCab = await Cab.findById(cab);
+    const foundUser = await User.findById(user);
+    if (!foundCab || !foundUser) {
+      return res.status(404).json({ message: 'Cab or User not found.' });
+    }
+
+    // Get amount and taxRate from Cab model
+    const baseAmount = foundCab.discountedPrice || 500; // fallback if no price field
+    const taxRate = foundCab.taxRate || 10;
+
+    // Create booking without totalAmount (it will be auto-computed)
+    const newBooking = new CabBooking({
+      cab,
+      user,
+      pickupLocation,
+      dropoffLocation,
+      pickupTime,
+      dropoffTime,
+      amount: baseAmount,
+      taxRate,
+    });
+
+    // Save the booking
+    const savedBooking = await newBooking.save();
+    return res.status(201).json(savedBooking);
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'An error occurred while creating the booking.' });
+  }
 }
+
 
 export async function Update(req,res){
     try {
